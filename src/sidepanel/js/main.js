@@ -103,6 +103,7 @@ function setupEventListeners() {
 async function handleSummarizeClick() {
 	try {
 		showLoading(true);
+		hideError();
 
 		// Get the format and length preferences
 		const format = formatSelect.value;
@@ -119,7 +120,6 @@ async function handleSummarizeClick() {
 In the next phase, we'll implement the actual API call to OpenAI for generating summaries.`;
 
 			displaySummary(dummySummary);
-			showLoading(false);
 
 			// Save the format and length preferences
 			saveFormatAndLengthPreferences(format, length);
@@ -328,12 +328,20 @@ function showLoading(isLoading) {
 }
 
 /**
+ * Hide error message
+ */
+function hideError() {
+	errorMessage.classList.add('hidden');
+}
+
+/**
  * Display a summary in the UI
  * @param {string} summary - The summary text to display
  */
 function displaySummary(summary) {
 	summaryText.textContent = summary;
 	summaryContent.classList.remove('hidden');
+	loadingIndicator.classList.add('hidden'); // Make sure loading is hidden when showing summary
 }
 
 /**

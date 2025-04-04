@@ -112,6 +112,13 @@ This document outlines our approach to developing the AIPageSummarizer Chrome ex
 -   Follow a modular component-based architecture
 -   Use ES modules for code organization
 -   Maintain clear separation of concerns between UI, logic, and API
+-   **Code Modularity Guideline**: Consider modularization when files approach 500 lines
+    -   Use this as a signal to evaluate organization, not as a strict rule
+    -   Prioritize logical cohesion over arbitrary line counts
+    -   Maintain complete functions/components in a single file when they belong together
+    -   Extract independent features or components when they can stand alone
+    -   Use webpack's module system to organize code without sacrificing developer experience
+    -   Document file relationships with clear import/export patterns and comments
 
 ### Performance
 
