@@ -6,12 +6,12 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 module.exports = {
 	entry: {
 		serviceWorker: './src/background/serviceWorker.js',
-		content: './src/content/content-script.js',
-		sidepanel: './src/sidepanel/js/main.js'
+		'content/content-script': './src/content/content-script.js',
+		'sidepanel/js/main': './src/sidepanel/js/main.js'
 	},
 	output: {
-		filename: '[name].js',
 		path: path.resolve(__dirname, '../dist'),
+		filename: '[name].js',
 		clean: true
 	},
 	module: {
@@ -36,22 +36,26 @@ module.exports = {
 		new CopyPlugin({
 			patterns: [
 				{
-					from: 'src/manifest.json',
+					from: './src/manifest.json',
 					to: 'manifest.json'
 				},
 				{
-					from: 'src/assets',
+					from: './src/assets',
 					to: 'assets'
+				},
+				{
+					from: './src/sidepanel/css',
+					to: 'sidepanel/css'
 				}
 			]
 		}),
 		new HtmlWebpackPlugin({
 			template: './src/sidepanel/index.html',
 			filename: 'sidepanel/index.html',
-			chunks: ['sidepanel']
+			chunks: ['sidepanel/js/main']
 		}),
 		new MiniCssExtractPlugin({
-			filename: 'sidepanel/css/[name].css'
+			filename: '[name].css'
 		})
 	]
 };

@@ -5,6 +5,8 @@
  * handling communication with the service worker.
  */
 
+console.log('Content script loaded');
+
 /**
  * Extracts the main content from the current webpage
  * using a multi-stage approach based on semantic HTML elements.
@@ -57,13 +59,19 @@ function summarizeFullPage() {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	console.log("Content script received message:", message);
 
-	if (message.action === "extractPageContent") {
-		const content = extractPageContent();
-		const metadata = getPageMetadata();
+	if (message.action === 'extractPageContent') {
+		// Simple content extraction for now
+		const content = document.body.innerText;
+		const title = document.title;
+		const url = window.location.href;
 
 		sendResponse({
 			content: content,
-			metadata: metadata
+			metadata: {
+				title: title,
+				url: url,
+				timestamp: new Date().toISOString()
+			}
 		});
 	}
 
