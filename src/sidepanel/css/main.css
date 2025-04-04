@@ -1,0 +1,347 @@
+/**
+ * Main CSS for Project Chimera SidePanel
+ */
+
+:root {
+	/* Color variables - light theme by default */
+	--bg-primary: #ffffff;
+	--bg-secondary: #f5f7fa;
+	--text-primary: #333333;
+	--text-secondary: #666666;
+	--accent-color: #4f6df5;
+	--accent-hover: #3b5bd9;
+	--border-color: #e0e0e0;
+	--error-color: #e53935;
+	--success-color: #43a047;
+
+	/* Sizing */
+	--spacing-xs: 4px;
+	--spacing-sm: 8px;
+	--spacing-md: 16px;
+	--spacing-lg: 24px;
+	--spacing-xl: 32px;
+	--border-radius: 4px;
+
+	/* Typography */
+	--font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+	--bg-primary: #1e1e1e;
+	--bg-secondary: #2d2d2d;
+	--text-primary: #e0e0e0;
+	--text-secondary: #b0b0b0;
+	--border-color: #3d3d3d;
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family: var(--font-family);
+	background-color: var(--bg-primary);
+	color: var(--text-primary);
+	font-size: 14px;
+	line-height: 1.5;
+	margin: 0;
+	padding: 0;
+	min-width: 300px;
+	transition: background-color 0.3s ease;
+}
+
+.app-container {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	max-width: 100%;
+}
+
+.app-header {
+	padding: var(--spacing-md);
+	border-bottom: 1px solid var(--border-color);
+	background-color: var(--bg-primary);
+}
+
+.app-header h1 {
+	font-size: 18px;
+	font-weight: 500;
+	margin: 0;
+}
+
+.tab-navigation {
+	display: flex;
+	border-bottom: 1px solid var(--border-color);
+	background-color: var(--bg-primary);
+}
+
+.tab-button {
+	flex: 1;
+	padding: var(--spacing-md);
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--text-secondary);
+	font-weight: 500;
+	transition: color 0.2s, border-bottom 0.2s;
+}
+
+.tab-button.active {
+	color: var(--accent-color);
+	border-bottom: 2px solid var(--accent-color);
+}
+
+.tab-button:hover:not(.active) {
+	color: var(--text-primary);
+}
+
+.tab-button:focus {
+	outline: none;
+	background-color: rgba(79, 109, 245, 0.05);
+}
+
+.tab-content {
+	flex: 1;
+	overflow-y: auto;
+	padding: var(--spacing-md);
+}
+
+.tab-panel {
+	display: none;
+}
+
+.tab-panel.active {
+	display: block;
+}
+
+/* Controls styling */
+.controls-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--spacing-md);
+	margin-bottom: var(--spacing-md);
+}
+
+.format-controls,
+.length-controls {
+	min-width: 140px;
+}
+
+label {
+	display: block;
+	margin-bottom: var(--spacing-xs);
+	color: var(--text-secondary);
+	font-size: 13px;
+}
+
+select {
+	width: 100%;
+	padding: 8px;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background-color: var(--bg-primary);
+	color: var(--text-primary);
+}
+
+/* Button styling */
+.primary-button {
+	width: 100%;
+	padding: var(--spacing-md);
+	background-color: var(--accent-color);
+	color: white;
+	border: none;
+	border-radius: var(--border-radius);
+	cursor: pointer;
+	font-weight: 500;
+	transition: background-color 0.2s;
+}
+
+.primary-button:hover {
+	background-color: var(--accent-hover);
+}
+
+.primary-button:focus {
+	outline: none;
+	box-shadow: 0 0 0 2px rgba(79, 109, 245, 0.3);
+}
+
+/* Summary result container */
+.summary-result-container {
+	margin-top: var(--spacing-lg);
+	border-radius: var(--border-radius);
+	background-color: var(--bg-secondary);
+	min-height: 100px;
+}
+
+#summary-content {
+	padding: var(--spacing-md);
+}
+
+.summary-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: var(--spacing-md);
+}
+
+.summary-header h2 {
+	font-size: 16px;
+	font-weight: 500;
+	margin: 0;
+}
+
+.summary-actions button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: var(--spacing-xs);
+	color: var(--text-secondary);
+	border-radius: var(--border-radius);
+}
+
+.summary-actions button:hover {
+	color: var(--text-primary);
+	background-color: var(--bg-primary);
+}
+
+#summary-text {
+	line-height: 1.6;
+	white-space: pre-wrap;
+}
+
+/* Loading indicator */
+#loading-indicator {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: var(--spacing-xl);
+}
+
+.spinner {
+	width: 30px;
+	height: 30px;
+	border: 3px solid rgba(79, 109, 245, 0.3);
+	border-radius: 50%;
+	border-top-color: var(--accent-color);
+	animation: spin 1s linear infinite;
+	margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+/* Settings styles */
+.settings-group {
+	margin-bottom: var(--spacing-lg);
+}
+
+.settings-group h3 {
+	font-size: 15px;
+	margin-bottom: var(--spacing-md);
+	color: var(--text-primary);
+}
+
+.setting-item {
+	margin-bottom: var(--spacing-md);
+}
+
+.setting-description {
+	font-size: 12px;
+	color: var(--text-secondary);
+	margin-top: var(--spacing-xs);
+}
+
+input[type="password"],
+input[type="text"] {
+	width: 100%;
+	padding: 8px;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background-color: var(--bg-primary);
+	color: var(--text-primary);
+}
+
+/* Toggle switch */
+.toggle-switch {
+	position: relative;
+	display: inline-block;
+	width: 44px;
+	height: 24px;
+	vertical-align: middle;
+	margin-right: var(--spacing-md);
+}
+
+.toggle-switch input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.toggle-slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: var(--border-color);
+	transition: 0.4s;
+	border-radius: 34px;
+}
+
+.toggle-slider:before {
+	position: absolute;
+	content: "";
+	height: 18px;
+	width: 18px;
+	left: 3px;
+	bottom: 3px;
+	background-color: white;
+	transition: 0.4s;
+	border-radius: 50%;
+}
+
+input:checked+.toggle-slider {
+	background-color: var(--accent-color);
+}
+
+input:checked+.toggle-slider:before {
+	transform: translateX(20px);
+}
+
+/* History styles */
+.search-container {
+	margin-bottom: var(--spacing-md);
+}
+
+.search-container input {
+	width: 100%;
+	padding: 8px 12px;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+}
+
+/* Helper classes */
+.hidden {
+	display: none;
+}
+
+/* Footer */
+.app-footer {
+	padding: var(--spacing-sm);
+	border-top: 1px solid var(--border-color);
+	text-align: center;
+	font-size: 12px;
+	color: var(--text-secondary);
+}

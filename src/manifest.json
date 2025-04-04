@@ -1,0 +1,37 @@
+{
+    "name": "Project Chimera - AI Page Summarizer",
+    "description": "Summarize web pages using AI directly from Chrome's side panel",
+    "version": "1.0.0",
+    "manifest_version": 3,
+    "icons": {
+        "16": "assets/icons/icon16.png",
+        "48": "assets/icons/icon48.png",
+        "128": "assets/icons/icon128.png"
+    },
+    "permissions": ["sidePanel", "contextMenus", "storage", "commands", "tts"],
+    "host_permissions": ["<all_urls>"],
+    "background": {
+        "service_worker": "background/serviceWorker.js",
+        "type": "module"
+    },
+    "side_panel": {
+        "default_path": "sidepanel/index.html"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content/content-script.js"]
+        }
+    ],
+    "action": {
+        "default_title": "Open AI Summarizer"
+    },
+    "commands": {
+        "_execute_action": {
+            "suggested_key": {
+                "default": "Alt+S"
+            },
+            "description": "Open AI Summarizer"
+        }
+    }
+}

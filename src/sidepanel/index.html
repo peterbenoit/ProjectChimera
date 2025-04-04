@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>AI Page Summarizer</title>
+        <link rel="stylesheet" href="css/main.css" />
+    </head>
+    <body>
+        <div class="app-container">
+            <header class="app-header">
+                <h1>AI Page Summarizer</h1>
+            </header>
+
+            <div class="tab-navigation">
+                <button class="tab-button active" data-tab="summary">Summary</button>
+                <button class="tab-button" data-tab="history">History</button>
+                <button class="tab-button" data-tab="settings">Settings</button>
+            </div>
+
+            <main class="tab-content">
+                <!-- Summary Tab -->
+                <section id="summary-tab" class="tab-panel active">
+                    <div class="controls-container">
+                        <div class="format-controls">
+                            <label for="format-select">Format:</label>
+                            <select id="format-select">
+                                <option value="bullets">Bullet Points</option>
+                                <option value="academic">Academic</option>
+                                <option value="professional">Professional</option>
+                                <option value="simplified">Simplified</option>
+                            </select>
+                        </div>
+
+                        <div class="length-controls">
+                            <label for="length-select">Length:</label>
+                            <select id="length-select">
+                                <option value="brief">Brief</option>
+                                <option value="detailed">Detailed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button id="summarize-btn" class="primary-button">Summarize Page</button>
+
+                    <div class="summary-result-container">
+                        <div id="loading-indicator" class="hidden">
+                            <div class="spinner"></div>
+                            <p>Generating summary...</p>
+                        </div>
+
+                        <div id="summary-content" class="hidden">
+                            <div class="summary-header">
+                                <h2 id="summary-title">Page Summary</h2>
+                                <div class="summary-actions">
+                                    <button id="copy-btn" title="Copy to clipboard">
+                                        <span class="icon">📋</span>
+                                    </button>
+                                    <button id="speak-btn" title="Listen to summary">
+                                        <span class="icon">🔊</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="summary-text"></div>
+                        </div>
+
+                        <div id="error-message" class="hidden">
+                            <p>There was an error generating the summary. Please try again.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- History Tab -->
+                <section id="history-tab" class="tab-panel hidden">
+                    <h2>Summary History</h2>
+                    <div class="search-container">
+                        <input type="text" id="history-search" placeholder="Search history..." />
+                    </div>
+                    <div id="history-list">
+                        <!-- History items will be inserted here dynamically -->
+                        <div class="empty-state">
+                            <p>No summary history yet.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Settings Tab -->
+                <section id="settings-tab" class="tab-panel hidden">
+                    <h2>Settings</h2>
+
+                    <div class="settings-group">
+                        <h3>Appearance</h3>
+                        <div class="setting-item">
+                            <label for="theme-select">Theme:</label>
+                            <select id="theme-select">
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                                <option value="system">System Default</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3>API Configuration</h3>
+                        <div class="setting-item">
+                            <label for="api-key">OpenAI API Key:</label>
+                            <input type="password" id="api-key" placeholder="Enter your API key" />
+                            <p class="setting-description">
+                                Your API key is stored securely and used only for generating
+                                summaries.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3>Content Script</h3>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enable-content-script" checked />
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>Enable content script on all pages</span>
+                        </div>
+                    </div>
+
+                    <button id="save-settings" class="primary-button">Save Settings</button>
+                </section>
+            </main>
+
+            <footer class="app-footer">
+                <p>Project Chimera v1.0.0</p>
+            </footer>
+        </div>
+
+        <script src="js/main.js" type="module"></script>
+    </body>
+</html>
