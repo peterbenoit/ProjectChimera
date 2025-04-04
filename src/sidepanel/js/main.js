@@ -142,12 +142,20 @@ function requestPageContent() {
 				return;
 			}
 
+			// Check if we're on a chrome:// page or other restricted URL
+			const tabUrl = tabs[0].url;
+			if (tabUrl.startsWith('chrome://') || tabUrl.startsWith('chrome-extension://')) {
+				reject(new Error('Summarization is not available on Chrome internal pages.'));
+				return;
+			}
+
 			chrome.tabs.sendMessage(
 				tabs[0].id,
 				{ action: 'extractPageContent' },
 				response => {
 					if (chrome.runtime.lastError) {
-						reject(new Error(chrome.runtime.lastError.message));
+						console.error("Content script error:", chrome.runtime.lastError);
+						reject(new Error('Could not connect to the page. Try refreshing the page or verifying that the extension is enabled.'));
 					} else if (response) {
 						resolve(response);
 					} else {
@@ -359,7 +367,16 @@ function showError() {
 function updateFooterInfo() {
 	const footerElement = document.querySelector('.app-footer p');
 	if (footerElement) {
-		const buildNumber = process.env.BUILD_NUMBER || 'dev';
+		// Use a safer way to access the build number
+		let buildNumber = 'dev';
+		try {
+			// Check if process.env is defined
+			if (typeof process !== 'undefined' && process.env && process.env.BUILD_NUMBER) {
+				buildNumber = process.env.BUILD_NUMBER;
+			}
+		} catch (e) {
+			console.log('Build number not available:', e);
+		}
 		footerElement.textContent = `Project Chimera v1.0.0.${buildNumber}`;
 	}
 }
