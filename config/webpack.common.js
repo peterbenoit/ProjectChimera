@@ -5,7 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
 	entry: {
-		serviceWorker: './src/background/serviceWorker.js',
+		'background/serviceWorker': './src/background/serviceWorker.js',
 		'content/content-script': './src/content/content-script.js',
 		'sidepanel/js/main': './src/sidepanel/js/main.js'
 	},
