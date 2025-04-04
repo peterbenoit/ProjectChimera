@@ -15,48 +15,87 @@
  */
 export async function generateSummary(content, options, apiKey) {
 	try {
-		// This is a placeholder for the actual API implementation
-		// In the next steps, we'll implement the actual OpenAI API call
-
 		console.log('API Client: Generating summary with options:', options);
 
 		if (!apiKey) {
 			throw new Error('API key is required');
 		}
 
-		// For now, we'll return a mock response
-		return Promise.resolve(`This is a mock summary for testing purposes.
+		// Limit content length to prevent excessive token usage
+		const maxContentLength = 15000;
+		const truncatedContent = content.length > maxContentLength
+			? content.substring(0, maxContentLength) + "...(content truncated for token efficiency)"
+			: content;
 
-Format: ${options.format}
-Length: ${options.length}
-Content length: ${content.length} characters`);
+		// Generate system prompt based on format and length options
+		const systemPrompt = getSystemPrompt(options.format, options.length);
 
-		// The actual implementation will make a fetch request to the OpenAI API
-		// return fetch('https://api.openai.com/v1/chat/completions', {
-		//   method: 'POST',
-		//   headers: {
-		//     'Content-Type': 'application/json',
-		//     'Authorization': `Bearer ${apiKey}`
-		//   },
-		//   body: JSON.stringify({
-		//     model: 'gpt-3.5-turbo',
-		//     messages: [
-		//       {
-		//         role: 'system',
-		//         content: `Create a ${options.length} summary in ${options.format} format.`
-		//       },
-		//       {
-		//         role: 'user',
-		//         content: content
-		//       }
-		//     ]
-		//   })
-		// })
-		// .then(response => response.json())
-		// .then(data => data.choices[0].message.content);
+		// Make the actual fetch request to OpenAI API
+		const response = await fetch('https://api.openai.com/v1/chat/completions', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${apiKey}`
+			},
+			body: JSON.stringify({
+				model: 'gpt-3.5-turbo',
+				messages: [
+					{
+						role: 'system',
+						content: systemPrompt
+					},
+					{
+						role: 'user',
+						content: truncatedContent
+					}
+				],
+				temperature: 0.5 // Lower temperature for more consistent summaries
+			})
+		});
+
+		if (!response.ok) {
+			const errorData = await response.json().catch(() => null);
+			console.error('API error response:', errorData);
+			throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+		}
+
+		const data = await response.json();
+		return data.choices[0].message.content;
 
 	} catch (error) {
 		console.error('Error generating summary:', error);
 		throw error;
 	}
+}
+
+/**
+ * Generate system prompt based on format and length options
+ *
+ * @param {string} format - The summary format
+ * @param {string} length - The summary length
+ * @returns {string} - The system prompt
+ */
+function getSystemPrompt(format, length) {
+	// Base instructions
+	let prompt = `You are an AI assistant specialized in summarizing content. `;
+
+	// Length-specific instructions
+	if (length === 'brief') {
+		prompt += `Create a concise summary that captures the main points in about 3-5 short paragraphs. `;
+	} else if (length === 'detailed') {
+		prompt += `Create a comprehensive summary that covers all significant points and details in about 5-7 paragraphs. `;
+	}
+
+	// Format-specific instructions
+	if (format === 'bullets') {
+		prompt += `Format your response as a bulleted list of key points, with a very brief introduction. Use • as bullet points. Be direct and clear.`;
+	} else if (format === 'academic') {
+		prompt += `Format your response in an academic style with formal language, clear structure, and objective analysis. Include an introduction, body paragraphs, and conclusion.`;
+	} else if (format === 'professional') {
+		prompt += `Format your response as a professional executive summary with clear sections, factual statements, and actionable insights. Keep the tone neutral and the language precise.`;
+	} else if (format === 'simplified') {
+		prompt += `Format your response in simple, easy-to-understand language. Avoid complex terminology, use shorter sentences, and explain concepts clearly as if to someone with limited background knowledge.`;
+	}
+
+	return prompt;
 }

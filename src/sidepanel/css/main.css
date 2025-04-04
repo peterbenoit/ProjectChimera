@@ -332,6 +332,33 @@ input:checked+.toggle-slider:before {
 	border-radius: var(--border-radius);
 }
 
+/* Error message styles */
+#error-message {
+	padding: var(--spacing-md);
+	color: var(--error-color);
+}
+
+.error-actions {
+	display: flex;
+	gap: var(--spacing-md);
+	margin-top: var(--spacing-md);
+}
+
+.secondary-button {
+	padding: var(--spacing-sm) var(--spacing-md);
+	background-color: var(--bg-primary);
+	color: var(--text-primary);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	cursor: pointer;
+	font-weight: 500;
+	transition: background-color 0.2s;
+}
+
+.secondary-button:hover {
+	background-color: var(--bg-secondary);
+}
+
 /* Helper classes */
 .hidden {
 	display: none;

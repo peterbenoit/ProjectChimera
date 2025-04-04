@@ -1,6 +1,7 @@
 /**
  * Main JavaScript for Project Chimera SidePanel
  */
+import { generateSummary } from '../../shared/api.js';
 
 // DOM Elements
 const tabButtons = document.querySelectorAll('.tab-button');
@@ -95,6 +96,17 @@ function setupEventListeners() {
 	if (themeSelect) {
 		themeSelect.addEventListener('change', handleThemeChange);
 	}
+
+	// Error action buttons
+	const retryBtn = document.getElementById('retry-btn');
+	if (retryBtn) {
+		retryBtn.addEventListener('click', handleSummarizeClick);
+	}
+
+	const settingsBtn = document.getElementById('settings-btn');
+	if (settingsBtn) {
+		settingsBtn.addEventListener('click', () => switchToTab('settings'));
+	}
 }
 
 /**
@@ -109,25 +121,44 @@ async function handleSummarizeClick() {
 		const format = formatSelect.value;
 		const length = lengthSelect.value;
 
+		// Get API key from storage
+		const settings = await getSettings();
+		if (!settings.apiKey) {
+			throw new Error('API key is required. Please add your OpenAI API key in the Settings tab.');
+		}
+
 		// Request the page content from the content script
-		const pageContent = await requestPageContent();
+		const pageData = await requestPageContent();
 
-		// Once we have the page content, we'll send it for summarization
-		// For now, we'll just show a dummy summary
-		setTimeout(() => {
-			const dummySummary = `This is a placeholder summary in ${format} format with ${length} length.
+		// Call the OpenAI API to generate the summary
+		const summary = await generateSummary(
+			pageData.content,
+			{ format, length },
+			settings.apiKey
+		);
 
-In the next phase, we'll implement the actual API call to OpenAI for generating summaries.`;
+		// Display the summary
+		displaySummary(summary);
 
-			displaySummary(dummySummary);
+		// Save the format and length preferences
+		saveFormatAndLengthPreferences(format, length);
 
-			// Save the format and length preferences
-			saveFormatAndLengthPreferences(format, length);
-		}, 1500);
 	} catch (error) {
 		console.error('Error summarizing page:', error);
-		showError();
+		showError(error.message || 'An error occurred while generating the summary.');
 	}
+}
+
+/**
+ * Get settings from storage
+ * @returns {Promise<Object>}
+ */
+function getSettings() {
+	return new Promise((resolve) => {
+		chrome.storage.local.get(['settings'], data => {
+			resolve(data.settings || {});
+		});
+	});
 }
 
 /**
@@ -354,11 +385,20 @@ function displaySummary(summary) {
 
 /**
  * Show error message
+ * @param {string} message - Optional custom error message
  */
-function showError() {
+function showError(message) {
 	loadingIndicator.classList.add('hidden');
 	summaryContent.classList.add('hidden');
 	errorMessage.classList.remove('hidden');
+
+	// Update error message if provided
+	if (message) {
+		const errorText = errorMessage.querySelector('p');
+		if (errorText) {
+			errorText.textContent = message;
+		}
+	}
 }
 
 /**
