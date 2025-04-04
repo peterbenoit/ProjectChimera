@@ -180,6 +180,10 @@ select {
 	padding: var(--spacing-md);
 }
 
+#summary-content.hidden {
+	display: none;
+}
+
 .summary-header {
 	display: flex;
 	justify-content: space-between;
@@ -219,6 +223,10 @@ select {
 	align-items: center;
 	justify-content: center;
 	padding: var(--spacing-xl);
+}
+
+#loading-indicator.hidden {
+	display: none;
 }
 
 .spinner {
@@ -338,6 +346,10 @@ input:checked+.toggle-slider:before {
 	color: var(--error-color);
 }
 
+#error-message.hidden {
+	display: none;
+}
+
 .error-actions {
 	display: flex;
 	gap: var(--spacing-md);
@@ -357,11 +369,6 @@ input:checked+.toggle-slider:before {
 
 .secondary-button:hover {
 	background-color: var(--bg-secondary);
-}
-
-/* Helper classes */
-.hidden {
-	display: none;
 }
 
 /* Footer */

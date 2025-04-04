@@ -343,7 +343,6 @@ function checkForPendingMessages() {
 			setTimeout(() => {
 				const selectedTextSummary = `Selected Text Summary:\n\n${message.text}`;
 				displaySummary(selectedTextSummary);
-				showLoading(false);
 			}, 1000);
 		}
 
@@ -363,6 +362,8 @@ function showLoading(isLoading) {
 		errorMessage.classList.add('hidden');
 	} else {
 		loadingIndicator.classList.add('hidden');
+		// Don't automatically show anything else when hiding the loader
+		// This allows the calling function to control what becomes visible
 	}
 }
 
