@@ -34,6 +34,9 @@ function initialize() {
 	// Check for any pending messages (e.g., from context menu selection)
 	checkForPendingMessages();
 
+	// Check if API key exists, redirect to settings if not
+	checkApiKeyAndRedirect();
+
 	console.log('Project Chimera sidepanel initialized');
 }
 
@@ -350,6 +353,51 @@ function updateFooterInfo() {
 	if (footerElement) {
 		const buildNumber = process.env.BUILD_NUMBER || 'dev';
 		footerElement.textContent = `Project Chimera v1.0.0.${buildNumber}`;
+	}
+}
+
+/**
+ * Check if API key exists and redirect to settings if not
+ */
+function checkApiKeyAndRedirect() {
+	chrome.storage.local.get(['settings'], data => {
+		const settings = data.settings || {};
+		const apiKey = settings.apiKey;
+
+		if (!apiKey || apiKey.trim() === '') {
+			console.log('No API key found, redirecting to settings tab');
+			// Switch to settings tab
+			switchToTab('settings');
+		}
+	});
+}
+
+/**
+ * Switch to specified tab programmatically
+ * @param {string} tabName - Name of the tab to switch to
+ */
+function switchToTab(tabName) {
+	// Find the button for the requested tab
+	const targetButton = Array.from(tabButtons).find(
+		button => button.getAttribute('data-tab') === tabName
+	);
+
+	if (targetButton) {
+		// Update active button
+		tabButtons.forEach(btn => {
+			btn.classList.remove('active');
+		});
+		targetButton.classList.add('active');
+
+		// Update active panel
+		tabPanels.forEach(panel => {
+			panel.classList.remove('active');
+			panel.classList.add('hidden');
+		});
+
+		const activePanel = document.getElementById(`${tabName}-tab`);
+		activePanel.classList.add('active');
+		activePanel.classList.remove('hidden');
 	}
 }
 

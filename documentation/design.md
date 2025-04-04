@@ -157,6 +157,13 @@ We'll use a vanilla JavaScript approach with:
 
 The UI will follow a component-based architecture without using a framework to keep it lightweight.
 
+### User Experience Flow
+
+-   First-time users will be automatically directed to the Settings tab until they provide an API key
+-   The extension will remember the user's last active tab between sessions
+-   Error states will provide clear guidance on how to resolve issues
+-   The UI will be responsive to different sidePanel widths
+
 ## 9. Development Workflow
 
 1. **Setup**: Configure build system and development environment

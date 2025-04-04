@@ -154,6 +154,14 @@ This document outlines our approach to developing the AIPageSummarizer Chrome ex
     -   Optional integration with password manager extensions
 -   Add clear documentation about security implications of API key storage
 
+### API Key Management
+
+-   Redirect users to the Settings tab on first launch or when no API key is present
+-   Provide clear instructions on how to obtain an API key
+-   Implement secure storage options for API keys
+-   Include validation to ensure API keys are entered correctly
+-   Consider adding a "Test Connection" button to verify API key validity
+
 ### Usage Management
 
 -   Add basic usage tracking to show users their approximate token consumption
