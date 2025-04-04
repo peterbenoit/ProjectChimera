@@ -342,5 +342,19 @@ function showError() {
 	errorMessage.classList.remove('hidden');
 }
 
+/**
+ * Update the footer with version and build info
+ */
+function updateFooterInfo() {
+	const footerElement = document.querySelector('.app-footer p');
+	if (footerElement) {
+		const buildNumber = process.env.BUILD_NUMBER || 'dev';
+		footerElement.textContent = `Project Chimera v1.0.0.${buildNumber}`;
+	}
+}
+
 // Initialize the sidepanel when the DOM is loaded
-document.addEventListener('DOMContentLoaded', initialize);
+document.addEventListener('DOMContentLoaded', () => {
+	initialize();
+	updateFooterInfo();
+});
