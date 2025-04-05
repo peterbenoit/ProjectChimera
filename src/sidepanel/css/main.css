@@ -141,7 +141,7 @@ select {
 	width: 100%;
 	padding: 8px;
 	border: 1px solid var(--border-color);
-	border-radius: var(--border-radius);
+	border-radius: var (--border-radius);
 	background-color: var(--bg-primary);
 	color: var(--text-primary);
 }
@@ -149,7 +149,7 @@ select {
 /* Button styling */
 .primary-button {
 	width: 100%;
-	padding: var(--spacing-md);
+	padding: var(--spacing-sm);
 	background-color: var(--accent-color);
 	color: white;
 	border: none;
@@ -343,7 +343,7 @@ input:checked+.toggle-slider:before {
 /* Error message styles */
 #error-message {
 	padding: var(--spacing-md);
-	color: var(--error-color);
+	color: var (--error-color);
 }
 
 #error-message.hidden {
@@ -357,7 +357,7 @@ input:checked+.toggle-slider:before {
 }
 
 .secondary-button {
-	padding: var(--spacing-sm) var(--spacing-md);
+	padding: var(--spacing-sm) var(--spacing-sm);
 	background-color: var(--bg-primary);
 	color: var(--text-primary);
 	border: 1px solid var(--border-color);
@@ -378,4 +378,140 @@ input:checked+.toggle-slider:before {
 	text-align: center;
 	font-size: 12px;
 	color: var(--text-secondary);
+}
+
+/* Add these styles at the end of the file */
+
+/* History styles */
+.history-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: var(--spacing-md);
+}
+
+.history-item {
+	background-color: var(--bg-secondary);
+	border-radius: var(--border-radius);
+	padding: var(--spacing-md);
+	margin-bottom: var(--spacing-md);
+	border-left: 3px solid var(--accent-color);
+}
+
+.history-item-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: var(--spacing-xs);
+}
+
+.history-item-title {
+	font-size: 15px;
+	font-weight: 500;
+	margin: 0;
+	line-height: 1.3;
+	flex: 1;
+	cursor: pointer;
+	padding: var(--spacing-xs) 0;
+}
+
+.history-item-title:hover {
+	color: var(--accent-color);
+}
+
+.history-item-actions {
+	display: flex;
+	gap: var(--spacing-xs);
+}
+
+.history-item-actions button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 4px;
+	color: var(--text-secondary);
+	border-radius: var(--border-radius);
+}
+
+.history-item-actions button:hover {
+	color: var(--text-primary);
+	background-color: var(--bg-primary);
+}
+
+.history-item-meta {
+	display: flex;
+	justify-content: space-between;
+	font-size: 12px;
+	color: var(--text-secondary);
+	margin-bottom: var(--spacing-xs);
+}
+
+.history-item-url {
+	font-size: 12px;
+	color: var(--accent-color);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin-bottom: var(--spacing-sm);
+}
+
+.history-item-content {
+	font-size: 13px;
+	line-height: 1.5;
+	white-space: pre-wrap;
+	padding: var(--spacing-sm);
+	background-color: var(--bg-primary);
+	border-radius: var(--border-radius);
+	margin-top: var(--spacing-sm);
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.history-item-content.hidden {
+	display: none;
+}
+
+.empty-state {
+	text-align: center;
+	padding: var(--spacing-xl);
+	color: var(--text-secondary);
+}
+
+/* Custom confirmation dialog */
+.confirmation-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+}
+
+.confirmation-dialog {
+	background-color: var(--bg-primary);
+	border-radius: var(--border-radius);
+	padding: var(--spacing-lg);
+	width: 80%;
+	max-width: 300px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.confirmation-dialog p {
+	margin-bottom: var(--spacing-md);
+	color: var(--text-primary);
+	text-align: center;
+}
+
+.confirmation-buttons {
+	display: flex;
+	gap: var(--spacing-md);
+	justify-content: space-around;
+	margin-top: var(--spacing-md);
+}
+
+.confirmation-buttons button {
+	min-width: 80px;
 }

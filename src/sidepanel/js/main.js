@@ -2,6 +2,7 @@
  * Main JavaScript for Project Chimera SidePanel
  */
 import { generateSummary } from '../../shared/api.js';
+import { saveSummaryToHistory, getSummaryHistory, deleteSummaryFromHistory, clearSummaryHistory } from '../../shared/storage.js';
 
 // DOM Elements
 const tabButtons = document.querySelectorAll('.tab-button');
@@ -37,6 +38,9 @@ function initialize() {
 
 	// Check if API key exists, redirect to settings if not
 	checkApiKeyAndRedirect();
+
+	// Load history data for the history tab
+	loadHistoryData();
 
 	console.log('Project Chimera sidepanel initialized');
 }
@@ -107,6 +111,29 @@ function setupEventListeners() {
 	if (settingsBtn) {
 		settingsBtn.addEventListener('click', () => switchToTab('settings'));
 	}
+
+	// Add clear history button handler
+	const clearHistoryBtn = document.getElementById('clear-history-btn');
+	if (clearHistoryBtn) {
+		clearHistoryBtn.addEventListener('click', async () => {
+			showCustomConfirmation('Are you sure you want to clear all summary history?', async () => {
+				await clearSummaryHistory();
+				loadHistoryData();
+			});
+		});
+	}
+
+	// Add history tab activation listener
+	const historyTabBtn = Array.from(tabButtons).find(
+		button => button.getAttribute('data-tab') === 'history'
+	);
+
+	if (historyTabBtn) {
+		historyTabBtn.addEventListener('click', () => {
+			// Refresh history data when switching to history tab
+			loadHistoryData();
+		});
+	}
 }
 
 /**
@@ -142,6 +169,24 @@ async function handleSummarizeClick() {
 
 		// Save the format and length preferences
 		saveFormatAndLengthPreferences(format, length);
+
+		// Check if this summary is a duplicate before saving
+		const history = await getSummaryHistory();
+		const isDuplicate = history.some(item =>
+			item.metadata.url === pageData.metadata.url &&
+			item.content === summary &&
+			Math.abs(new Date(item.timestamp) - new Date()) < 60000 // Within 1 minute
+		);
+
+		if (!isDuplicate) {
+			// Only save if it's not a duplicate
+			await saveSummaryToHistory({
+				content: summary,
+				metadata: pageData.metadata,
+				options: { format, length },
+				timestamp: new Date().toISOString()
+			});
+		}
 
 	} catch (error) {
 		console.error('Error summarizing page:', error);
@@ -465,6 +510,216 @@ function switchToTab(tabName) {
 		activePanel.classList.add('active');
 		activePanel.classList.remove('hidden');
 	}
+}
+
+/**
+ * Load history data and populate the history tab
+ */
+async function loadHistoryData() {
+	const historyList = document.getElementById('history-list');
+	if (!historyList) return;
+
+	const history = await getSummaryHistory();
+
+	if (history.length === 0) {
+		// Show empty state
+		historyList.innerHTML = `
+      <div class="empty-state">
+        <p>No summary history yet.</p>
+      </div>
+    `;
+		return;
+	}
+
+	// Clear existing content
+	historyList.innerHTML = '';
+
+	// Add each history item
+	history.forEach((item, index) => {
+		const historyItem = createHistoryItemElement(item, index);
+		historyList.appendChild(historyItem);
+	});
+
+	// Set up search functionality
+	setupHistorySearch();
+}
+
+/**
+ * Create a history item element
+ * @param {Object} item - The history item data
+ * @param {number} index - The index of the item in the history array
+ * @returns {HTMLElement} The created element
+ */
+function createHistoryItemElement(item, index) {
+	const itemElement = document.createElement('div');
+	itemElement.className = 'history-item';
+	itemElement.dataset.index = index;
+
+	const date = new Date(item.timestamp || item.metadata.timestamp);
+	const formattedDate = date.toLocaleString();
+
+	const formatName = getFormatDisplayName(item.options.format);
+	const lengthName = getLengthDisplayName(item.options.length);
+
+	itemElement.innerHTML = `
+    <div class="history-item-header">
+      <h3 class="history-item-title">${item.metadata.title || 'Untitled Page'}</h3>
+      <div class="history-item-actions">
+        <button class="history-copy-btn" title="Copy Summary">
+          <span class="icon">📋</span>
+        </button>
+        <button class="history-delete-btn" title="Delete Summary">
+          <span class="icon">🗑️</span>
+        </button>
+      </div>
+    </div>
+    <div class="history-item-meta">
+      <span class="history-item-date">${formattedDate}</span>
+      <span class="history-item-format">${formatName}, ${lengthName}</span>
+    </div>
+    <div class="history-item-url" title="${item.metadata.url}">
+      ${item.metadata.url}
+    </div>
+    <div class="history-item-content hidden">
+      ${item.content}
+    </div>
+  `;
+
+	// Add event listeners to buttons
+	const copyBtn = itemElement.querySelector('.history-copy-btn');
+	const deleteBtn = itemElement.querySelector('.history-delete-btn');
+	const contentDiv = itemElement.querySelector('.history-item-content');
+	const titleElement = itemElement.querySelector('.history-item-title');
+
+	// Add click event to title
+	titleElement.addEventListener('click', () => {
+		// Toggle content visibility when title is clicked
+		contentDiv.classList.toggle('hidden');
+	});
+
+	copyBtn.addEventListener('click', () => {
+		// We'll implement copy functionality later
+		const content = item.content;
+		navigator.clipboard.writeText(content)
+			.then(() => {
+				// Show a quick "Copied" indicator
+				const originalText = copyBtn.innerHTML;
+				copyBtn.innerHTML = '<span class="icon">✓</span>';
+				setTimeout(() => {
+					copyBtn.innerHTML = originalText;
+				}, 1500);
+			})
+			.catch(err => {
+				console.error('Could not copy text:', err);
+			});
+	});
+
+	deleteBtn.addEventListener('click', async () => {
+		showCustomConfirmation('Are you sure you want to delete this summary?', async () => {
+			await deleteSummaryFromHistory(index);
+			loadHistoryData(); // Reload the list
+		});
+	});
+
+	return itemElement;
+}
+
+/**
+ * Get display name for format option
+ * @param {string} format - Format identifier
+ * @returns {string} Display name
+ */
+function getFormatDisplayName(format) {
+	const formats = {
+		'bullets': 'Bullet Points',
+		'academic': 'Academic',
+		'professional': 'Professional',
+		'simplified': 'Simplified'
+	};
+	return formats[format] || format;
+}
+
+/**
+ * Get display name for length option
+ * @param {string} length - Length identifier
+ * @returns {string} Display name
+ */
+function getLengthDisplayName(length) {
+	const lengths = {
+		'brief': 'Brief',
+		'detailed': 'Detailed'
+	};
+	return lengths[length] || length;
+}
+
+/**
+ * Set up history search functionality
+ */
+function setupHistorySearch() {
+	const searchInput = document.getElementById('history-search');
+	if (!searchInput) return;
+
+	searchInput.addEventListener('input', () => {
+		const query = searchInput.value.toLowerCase();
+		const historyItems = document.querySelectorAll('.history-item');
+
+		historyItems.forEach(item => {
+			const title = item.querySelector('.history-item-title').textContent.toLowerCase();
+			const url = item.querySelector('.history-item-url').textContent.toLowerCase();
+			const content = item.querySelector('.history-item-content').textContent.toLowerCase();
+
+			if (title.includes(query) || url.includes(query) || content.includes(query)) {
+				item.style.display = 'block';
+			} else {
+				item.style.display = 'none';
+			}
+		});
+	});
+}
+
+/**
+ * Show a custom confirmation dialog
+ *
+ * @param {string} message - The confirmation message
+ * @param {Function} onConfirm - Callback when user confirms
+ * @param {Function} onCancel - Callback when user cancels
+ */
+function showCustomConfirmation(message, onConfirm, onCancel = () => { }) {
+	// Create overlay
+	const overlay = document.createElement('div');
+	overlay.className = 'confirmation-overlay';
+
+	// Create dialog
+	const dialog = document.createElement('div');
+	dialog.className = 'confirmation-dialog';
+
+	dialog.innerHTML = `
+    <p>${message}</p>
+    <div class="confirmation-buttons">
+      <button class="secondary-button cancel-btn">Cancel</button>
+      <button class="primary-button confirm-btn">Confirm</button>
+    </div>
+  `;
+
+	// Add dialog to overlay
+	overlay.appendChild(dialog);
+
+	// Add to body
+	document.body.appendChild(overlay);
+
+	// Add event listeners
+	const confirmBtn = dialog.querySelector('.confirm-btn');
+	const cancelBtn = dialog.querySelector('.cancel-btn');
+
+	confirmBtn.addEventListener('click', () => {
+		document.body.removeChild(overlay);
+		onConfirm();
+	});
+
+	cancelBtn.addEventListener('click', () => {
+		document.body.removeChild(overlay);
+		onCancel();
+	});
 }
 
 // Initialize the sidepanel when the DOM is loaded
