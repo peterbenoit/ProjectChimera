@@ -464,6 +464,10 @@ input:checked+.toggle-slider:before {
 	margin-top: var(--spacing-sm);
 	max-height: 200px;
 	overflow-y: auto;
+	/* Fix for alignment issues */
+	text-align: left;
+	padding-left: var(--spacing-md);
+	padding-right: var(--spacing-md);
 }
 
 .history-item-content.hidden {

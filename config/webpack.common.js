@@ -52,7 +52,9 @@ module.exports = {
 		new HtmlWebpackPlugin({
 			template: './src/sidepanel/index.html',
 			filename: 'sidepanel/index.html',
-			chunks: ['sidepanel/js/main']
+			chunks: ['sidepanel/js/main'],
+			inject: true, // Explicitly state this should inject the script
+			scriptLoading: 'module' // Use module type for script tags
 		}),
 		new MiniCssExtractPlugin({
 			filename: '[name].css'

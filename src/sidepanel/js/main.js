@@ -20,10 +20,16 @@ const saveSettingsBtn = document.getElementById('save-settings');
 const apiKeyInput = document.getElementById('api-key');
 const themeSelect = document.getElementById('theme-select');
 
+// At the top of your file, add this flag
+let isInitialized = false;
+
 /**
  * Initialize the sidepanel UI
  */
 function initialize() {
+	console.log('Initialize called from:', new Error().stack);
+	console.log('Project Chimera sidepanel initialized');
+
 	// Set up tab navigation
 	setupTabNavigation();
 
@@ -41,8 +47,6 @@ function initialize() {
 
 	// Load history data for the history tab
 	loadHistoryData();
-
-	console.log('Project Chimera sidepanel initialized');
 }
 
 /**
@@ -561,6 +565,19 @@ function createHistoryItemElement(item, index) {
 	const formatName = getFormatDisplayName(item.options.format);
 	const lengthName = getLengthDisplayName(item.options.length);
 
+	// Format the content to handle bullet points properly
+	let formattedContent = item.content;
+
+	// If it's a bullet list, ensure proper formatting
+	if (item.options.format === 'bullets') {
+		// Split by newlines and create properly formatted HTML
+		formattedContent = item.content
+			.split('\n')
+			.filter(line => line.trim())
+			.map(line => `<div class="bullet-point">${line.trim()}</div>`)
+			.join('');
+	}
+
 	itemElement.innerHTML = `
     <div class="history-item-header">
       <h3 class="history-item-title">${item.metadata.title || 'Untitled Page'}</h3>
@@ -581,7 +598,7 @@ function createHistoryItemElement(item, index) {
       ${item.metadata.url}
     </div>
     <div class="history-item-content hidden">
-      ${item.content}
+      ${formattedContent}
     </div>
   `;
 
@@ -685,6 +702,12 @@ function setupHistorySearch() {
  * @param {Function} onCancel - Callback when user cancels
  */
 function showCustomConfirmation(message, onConfirm, onCancel = () => { }) {
+	// Check if there's already a confirmation dialog and remove it
+	const existingOverlay = document.querySelector('.confirmation-overlay');
+	if (existingOverlay) {
+		document.body.removeChild(existingOverlay);
+	}
+
 	// Create overlay
 	const overlay = document.createElement('div');
 	overlay.className = 'confirmation-overlay';
