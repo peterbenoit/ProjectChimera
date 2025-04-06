@@ -86,6 +86,8 @@ function getSystemPrompt(format, length) {
 		prompt += `Create a comprehensive summary that covers all significant points and details in about 5-7 paragraphs. `;
 	}
 
+	prompt += `Do not include any personal opinions or subjective statements. Focus solely on the content provided.`;
+
 	// Format-specific instructions
 	if (format === 'bullets') {
 		prompt += `Format your response as a bulleted list of key points, with a very brief introduction. Use • as bullet points. Be direct and clear.`;
@@ -96,6 +98,10 @@ function getSystemPrompt(format, length) {
 	} else if (format === 'simplified') {
 		prompt += `Format your response in simple, easy-to-understand language. Avoid complex terminology, use shorter sentences, and explain concepts clearly as if to someone with limited background knowledge.`;
 	}
+
+	prompt += `Do not use any markdown, only HTML formatting if required.`;
+	prompt += `<b> for bold text, <i> for italic text, <u> for underlined text, <p> for paragraphs, <br> for line breaks.`;
+	prompt += `Avoid using any other HTML tags, this is a partial HTML document.`;
 
 	return prompt;
 }

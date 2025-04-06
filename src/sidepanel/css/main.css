@@ -1,9 +1,4 @@
-/**
- * Main CSS for Project Chimera SidePanel
- */
-
 :root {
-	/* Color variables - light theme by default */
 	--bg-primary: #ffffff;
 	--bg-secondary: #f5f7fa;
 	--text-primary: #333333;
@@ -14,7 +9,6 @@
 	--error-color: #e53935;
 	--success-color: #43a047;
 
-	/* Sizing */
 	--spacing-xs: 4px;
 	--spacing-sm: 8px;
 	--spacing-md: 16px;
@@ -22,11 +16,9 @@
 	--spacing-xl: 32px;
 	--border-radius: 4px;
 
-	/* Typography */
 	--font-family: 'Outfit', system-ui, -apple-system, sans-serif;
 }
 
-/* Dark theme */
 [data-theme="dark"] {
 	--bg-primary: #1e1e1e;
 	--bg-secondary: #2d2d2d;
@@ -117,7 +109,6 @@ body {
 	display: block;
 }
 
-/* Controls styling */
 .controls-container {
 	display: flex;
 	flex-wrap: wrap;
@@ -146,7 +137,6 @@ select {
 	color: var(--text-primary);
 }
 
-/* Button styling */
 .primary-button {
 	width: 100%;
 	padding: var(--spacing-sm);
@@ -168,7 +158,6 @@ select {
 	box-shadow: 0 0 0 2px rgba(79, 109, 245, 0.3);
 }
 
-/* Summary result container */
 .summary-result-container {
 	margin-top: var(--spacing-lg);
 	border-radius: var(--border-radius);
@@ -216,7 +205,6 @@ select {
 	white-space: pre-wrap;
 }
 
-/* Loading indicator */
 #loading-indicator {
 	display: flex;
 	flex-direction: column;
@@ -249,7 +237,6 @@ select {
 	}
 }
 
-/* Settings styles */
 .settings-group {
 	margin-bottom: var(--spacing-lg);
 }
@@ -280,7 +267,6 @@ input[type="text"] {
 	color: var(--text-primary);
 }
 
-/* Toggle switch */
 .toggle-switch {
 	position: relative;
 	display: inline-block;
@@ -328,7 +314,6 @@ input:checked+.toggle-slider:before {
 	transform: translateX(20px);
 }
 
-/* History styles */
 .search-container {
 	margin-bottom: var(--spacing-md);
 }
@@ -340,7 +325,6 @@ input:checked+.toggle-slider:before {
 	border-radius: var(--border-radius);
 }
 
-/* Error message styles */
 #error-message {
 	padding: var(--spacing-md);
 	color: var (--error-color);
@@ -371,7 +355,6 @@ input:checked+.toggle-slider:before {
 	background-color: var(--bg-secondary);
 }
 
-/* Footer */
 .app-footer {
 	padding: var(--spacing-sm);
 	border-top: 1px solid var(--border-color);
@@ -380,9 +363,7 @@ input:checked+.toggle-slider:before {
 	color: var(--text-secondary);
 }
 
-/* Add these styles at the end of the file */
 
-/* History styles */
 .history-actions {
 	display: flex;
 	justify-content: flex-end;
@@ -394,7 +375,6 @@ input:checked+.toggle-slider:before {
 	border-radius: var(--border-radius);
 	padding: var(--spacing-md);
 	margin-bottom: var(--spacing-md);
-	border-left: 3px solid var(--accent-color);
 }
 
 .history-item-header {
@@ -464,7 +444,6 @@ input:checked+.toggle-slider:before {
 	margin-top: var(--spacing-sm);
 	max-height: 200px;
 	overflow-y: auto;
-	/* Fix for alignment issues */
 	text-align: left;
 	padding-left: var(--spacing-md);
 	padding-right: var(--spacing-md);
@@ -480,7 +459,6 @@ input:checked+.toggle-slider:before {
 	color: var(--text-secondary);
 }
 
-/* Custom confirmation dialog */
 .confirmation-overlay {
 	position: fixed;
 	top: 0;

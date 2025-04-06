@@ -251,7 +251,7 @@ function requestPageContent() {
  * Handle copy button click
  */
 function handleCopyClick() {
-	if (summaryText.textContent) {
+	if (summaryText.innerHTML) {
 		navigator.clipboard.writeText(summaryText.textContent)
 			.then(() => {
 				// Show a quick "Copied" indicator
@@ -428,7 +428,7 @@ function hideError() {
  * @param {string} summary - The summary text to display
  */
 function displaySummary(summary) {
-	summaryText.textContent = summary;
+	summaryText.innerHTML = summary;
 	summaryContent.classList.remove('hidden');
 	loadingIndicator.classList.add('hidden'); // Make sure loading is hidden when showing summary
 }
@@ -578,29 +578,28 @@ function createHistoryItemElement(item, index) {
 			.join('');
 	}
 
-	itemElement.innerHTML = `
-    <div class="history-item-header">
-      <h3 class="history-item-title">${item.metadata.title || 'Untitled Page'}</h3>
-      <div class="history-item-actions">
-        <button class="history-copy-btn" title="Copy Summary">
-          <span class="icon">📋</span>
-        </button>
-        <button class="history-delete-btn" title="Delete Summary">
-          <span class="icon">🗑️</span>
-        </button>
-      </div>
-    </div>
-    <div class="history-item-meta">
-      <span class="history-item-date">${formattedDate}</span>
-      <span class="history-item-format">${formatName}, ${lengthName}</span>
-    </div>
-    <div class="history-item-url" title="${item.metadata.url}">
-      ${item.metadata.url}
-    </div>
-    <div class="history-item-content hidden">
-      ${formattedContent}
-    </div>
-  `;
+	itemElement.innerHTML =
+		'<div class="history-item-header">' +
+		'<h3 class="history-item-title">' + (item.metadata.title || 'Untitled Page') + '</h3>' +
+		'<div class="history-item-actions">' +
+		'<button class="history-copy-btn" title="Copy Summary">' +
+		'<span class="icon">📋</span>' +
+		'</button>' +
+		'<button class="history-delete-btn" title="Delete Summary">' +
+		'<span class="icon">🗑️</span>' +
+		'</button>' +
+		'</div>' +
+		'</div>' +
+		'<div class="history-item-meta">' +
+		'<span class="history-item-date">' + formattedDate + '</span>' +
+		'<span class="history-item-format">' + formatName + ', ' + lengthName + '</span>' +
+		'</div>' +
+		'<div class="history-item-url" title="' + item.metadata.url + '">' +
+		item.metadata.url +
+		'</div>' +
+		'<div class="history-item-content hidden">' +
+		formattedContent +
+		'</div>';
 
 	// Add event listeners to buttons
 	const copyBtn = itemElement.querySelector('.history-copy-btn');
