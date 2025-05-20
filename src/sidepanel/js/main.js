@@ -434,38 +434,91 @@ function hideError() {
 function displaySummary(summary) {
 	let formattedSummary = summary;
 
+	console.log('Formatted summary:', formattedSummary);
+
+	// Convert markdown bullet points to HTML before other processing
+	formattedSummary = convertMarkdownToHtml(formattedSummary);
+
+	// Clean up any excessive whitespace that might be causing padding issues
+	formattedSummary = formattedSummary.replace(/\s{2,}/g, ' ').trim();
+
 	if (summary.includes('ADDITIONAL ANALYSIS')) {
-		formattedSummary = summary.replace(
+		// Create a clear visual separator for the analysis section
+		formattedSummary = formattedSummary.replace(
 			'ADDITIONAL ANALYSIS',
 			'<div class="analysis-header">ADDITIONAL ANALYSIS</div>'
 		);
 
 		if (formattedSummary.includes('<h3>')) {
-			const sections = formattedSummary.split('<h3>');
+			// Process each section individually
+			const mainContent = formattedSummary.split('<div class="analysis-header">')[0];
+			const analysisPart = '<div class="analysis-header">' + formattedSummary.split('<div class="analysis-header">')[1];
+
+			// Process the analysis sections
+			const sections = analysisPart.split('<h3>');
+			let processedSections = sections[0]; // This is the header
+
 			for (let i = 1; i < sections.length; i++) {
 				let section = sections[i];
+				const sectionTitle = section.split('</h3>')[0];
+				let sectionContent = '<h3>' + sectionTitle + '</h3>';
 
-				section = section.replace(
-					/(?:(?:\r\n|\r|\n)(?:\s*[•\-\*]\s+)(.+))+/g,
-					function (match) {
-						const items = match.split(/\r\n|\r|\n/)
-							.filter(line => line.trim().match(/^\s*[•\-\*]/))
-							.map(line => line.replace(/^\s*[•\-\*]\s+/, ''))
-							.map(line => `<li>${line}</li>`)
-							.join('');
-						return `<ul>${items}</ul>`;
-					}
-				);
+				// Process specific section types
+				if (sectionTitle.includes('Unsubstantiated or Vague Claims')) {
+					// Process vague claims with the enhanced function
+					sectionContent += processVagueClaimsSection(section);
+				} else {
+					// Regular processing for other sections
+					sectionContent += section
+						.replace(
+							/(?:(?:\r\n|\r|\n)(?:\s*[•\-\*]\s+)(.+))+/g,
+							function (match) {
+								const items = match.split(/\r\n|\r|\n/)
+									.filter(line => line.trim().match(/^\s*[•\-\*]/))
+									.map(line => line.replace(/^\s*[•\-\*]\s+/, ''))
+									.map(line => `<li>${line}</li>`)
+									.join('');
+								return `<ul>${items}</ul>`;
+							}
+						);
+				}
 
-				sections[i] = section;
+				// Replace the section with its processed version
+				processedSections += sectionContent.replace(/<h3>[\s\S]*?<\/h3>/, ''); // Remove duplicate h3
 			}
-			formattedSummary = sections[0] + sections.slice(1).map(s => `<h3>${s}`).join('');
+
+			// Combine the main content with processed analysis sections
+			formattedSummary = mainContent + processedSections;
 		}
 	}
 
-	// Set the HTML content first
+	// Set the HTML content
 	if (summaryText) {
+		// Ensure consistent spacing in the output HTML
+		formattedSummary = formattedSummary
+			.replace(/>\s+</g, '><') // Remove whitespace between tags
+			.replace(/(<div|<p|<h3)/g, '\n$1') // Add newlines before block elements for readability
+			.replace(/(<\/div>|<\/p>|<\/h3>)/g, '$1\n'); // Add newlines after block elements
+
 		summaryText.innerHTML = formattedSummary;
+
+		// Add event listeners to any claim items
+		const claimItems = summaryText.querySelectorAll('.claim-item');
+		claimItems.forEach(item => {
+			// Add expand/collapse functionality
+			item.addEventListener('click', function (e) {
+				if (e.target.closest('.claim-text')) {
+					// Toggle visibility of details
+					this.classList.toggle('expanded');
+
+					// Toggle a class on child elements to control their visibility
+					const details = this.querySelectorAll('.claim-type, .claim-confidence, .claim-explanation, .claim-improvement');
+					details.forEach(el => {
+						el.classList.toggle('expanded');
+					});
+				}
+			});
+		});
 	}
 
 	// Show the container and hide loading
@@ -476,6 +529,219 @@ function displaySummary(summary) {
 	if (loadingIndicator) {
 		loadingIndicator.classList.add('hidden');
 	}
+}
+
+/**
+ * Convert markdown formatting to HTML
+ * @param {string} text - The markdown text to convert
+ * @returns {string} - The converted HTML
+ */
+function convertMarkdownToHtml(text) {
+	// Safety check for null or undefined text
+	if (!text) return '';
+
+	let converted = text;
+
+	try {
+		// Convert bullet points to HTML list
+		converted = converted.replace(/(?:^|\n)(\s*[•\-\*]\s+.*(?:\n\s+[^•\-\*].*)*)+/gm, function (match) {
+			if (!match) return '';
+
+			const items = match.split(/\n/)
+				.filter(line => line && line.trim())
+				.map(line => {
+					// Check if this is a bullet point
+					if (line && line.trim().match(/^\s*[•\-\*]/)) {
+						return `<li>${line.replace(/^\s*[•\-\*]\s+/, '')}</li>`;
+					}
+					// This is a continuation of the previous bullet point
+					return line;
+				})
+				.join('');
+			return `<ul>${items}</ul>`;
+		});
+
+		// Convert numbered lists to HTML ordered lists
+		converted = converted.replace(/(?:^|\n)(\s*\d+\.\s+.*(?:\n\s+[^\d\.].*)*)+/gm, function (match) {
+			if (!match) return '';
+
+			const items = match.split(/\n/)
+				.filter(line => line && line.trim())
+				.map(line => {
+					// Check if this is a numbered item
+					if (line && line.trim().match(/^\s*\d+\.\s+/)) {
+						return `<li>${line.replace(/^\s*\d+\.\s+/, '')}</li>`;
+					}
+					// This is a continuation of the previous numbered item
+					return line;
+				})
+				.join('');
+			return `<ol>${items}</ol>`;
+		});
+
+		// Convert bold markdown to HTML
+		converted = converted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+		// Convert italic markdown to HTML
+		converted = converted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+	} catch (error) {
+		console.error('Error converting markdown to HTML:', error);
+		// Return the original text if an error occurs
+		return text;
+	}
+
+	return converted;
+}
+
+/**
+ * Process and enhance the vague claims section
+ * @param {string} section - The vague claims section
+ * @returns {string} - The processed section
+ */
+function processVagueClaimsSection(section) {
+	// Clean up any excessive whitespace that might be causing padding issues
+	section = section.replace(/\s{2,}/g, ' ').trim();
+
+	// Split out the end tag to keep the section enclosed properly
+	const parts = section.split('</h3>');
+	if (parts.length < 2) return section;
+
+	// Add proper heading formatting
+	let header = parts[0] + '</h3>';
+	let content = parts[1];
+
+	// Clean up any additional closing tags
+	content = content.replace(/<\/div><\/div>$/, '');
+
+	// If no vague claims were found
+	if (content.includes('No significant vague claims') || content.includes('no significant vague claims')) {
+		return `${header}
+		<div class="analysis-section vague-claims-section">
+			<p class="no-claims">No significant vague or unsubstantiated claims were identified in this content.</p>
+		</div>`;
+	}
+
+	// Create a clean structure for the claims section
+	let formattedContent = `
+	<div class="analysis-section vague-claims-section">
+		<p class="section-intro">I've identified the following vague or unsubstantiated claims in the content:</p>
+		<div class="claims-list">`;
+
+	// Extract each claim using regex pattern matching
+	// Look for patterns like: 1. "NLWeb may have its origins..." (Unverifiable, Medium)
+	const claimPattern = /(\d+)\.\s+"([^"]+)"\s*(?:\(([^,]+),\s*([^)]+)\))?/g;
+	let match;
+	let claimNumber = 1;
+	let hasMatches = false;
+
+	// Find claim patterns in the content
+	while ((match = claimPattern.exec(content)) !== null) {
+		hasMatches = true;
+		const [, , claimText, claimType = '', confidence = ''] = match;
+
+		// Get explanation and improvement text that follows this claim
+		const startPos = match.index + match[0].length;
+		const nextClaimMatch = content.substring(startPos).match(/\d+\.\s+"[^"]+"/);
+		const endPos = nextClaimMatch ? startPos + nextClaimMatch.index : content.length;
+		const followingText = content.substring(startPos, endPos);
+
+		// Extract explanation and improvement from the text
+		const explanationMatch = followingText.match(/(?:The statement|This claim|◦ Explanation:)\s*([^\.]+\.(?:[^-]+)?)/i);
+		const improvementMatch = followingText.match(/(?:To improve|◦ Improvement:)\s*([^\.]+\.(?:[^-]+)?)/i);
+
+		const explanation = explanationMatch ? explanationMatch[1].trim() : '';
+		const improvement = improvementMatch ? improvementMatch[1].trim() : '';
+
+		// Format a clean claim item
+		formattedContent += `
+			<div class="claim-item">
+				<div class="claim-number">${claimNumber}.</div>
+				<div class="claim-text">"${claimText.trim()}"</div>
+				${claimType ? `<div class="claim-type"><span class="type-label">Type:</span> <span class="type-value">${claimType.trim()}</span></div>` : ''}
+				${confidence ? `<div class="claim-confidence"><span class="confidence ${confidence.toLowerCase().trim()}">${confidence.trim()} Confidence</span></div>` : ''}
+				${explanation ? `<div class="claim-explanation"><span class="explanation-label">Issue:</span> ${explanation}</div>` : ''}
+				${improvement ? `<div class="claim-improvement"><span class="improvement-label">Suggested Improvement:</span> ${improvement}</div>` : ''}
+			</div>`;
+
+		claimNumber++;
+	}
+
+	// If no matches were found but we have content, try an alternative processing approach
+	if (!hasMatches && content.length > 30) {
+		// Look for any circle bullet points that might indicate claim details
+		const bulletPoints = content.match(/◦\s+([^:]+):\s+([^\n]+)/g);
+
+		if (bulletPoints && bulletPoints.length > 0) {
+			// Process structured bullet points
+			let currentClaim = null;
+			let claimDetails = {};
+
+			bulletPoints.forEach(bullet => {
+				const parts = bullet.match(/◦\s+([^:]+):\s+(.+)/);
+				if (parts) {
+					const [, key, value] = parts;
+
+					if (key.includes('Type')) {
+						// This is likely the start of a new claim
+						if (currentClaim) {
+							// Add the previous claim
+							formattedContent += formatClaimFromDetails(claimNumber++, claimDetails);
+							claimDetails = {};
+						}
+
+						const claimMatch = content.match(new RegExp(`(\\d+)\\.\s+"([^"]+)"\\s*`));
+						currentClaim = claimMatch ? claimMatch[2] : `Claim ${claimNumber}`;
+						claimDetails.text = currentClaim;
+						claimDetails.type = value.trim();
+					} else if (key.includes('Confidence')) {
+						claimDetails.confidence = value.trim();
+					} else if (key.includes('Explanation')) {
+						claimDetails.explanation = value.trim();
+					} else if (key.includes('Improvement')) {
+						claimDetails.improvement = value.trim();
+					}
+				}
+			});
+
+			// Add the last claim if it exists
+			if (Object.keys(claimDetails).length > 0) {
+				formattedContent += formatClaimFromDetails(claimNumber, claimDetails);
+			}
+
+			hasMatches = true;
+		} else {
+			// Fall back to general content cleaning
+			content = content.replace(/- This claim/g, '<div class="claim-explanation"><span class="explanation-label">Issue:</span>')
+				.replace(/- To improve,/g, '<div class="claim-improvement"><span class="improvement-label">Suggested Improvement:</span>')
+				.replace(/\.\s+(?=<)/g, '.</div> ');
+
+			formattedContent += content;
+		}
+	}
+
+	formattedContent += `
+		</div>
+	</div>`;
+
+	return header + formattedContent;
+}
+
+/**
+ * Format a claim from extracted details
+ * @param {number} number - The claim number
+ * @param {Object} details - The claim details
+ * @returns {string} - Formatted HTML for the claim
+ */
+function formatClaimFromDetails(number, details) {
+	return `
+	<div class="claim-item">
+		<div class="claim-number">${number}.</div>
+		<div class="claim-text">"${details.text || 'Unspecified claim'}"</div>
+		${details.type ? `<div class="claim-type"><span class="type-label">Type:</span> <span class="type-value">${details.type}</span></div>` : ''}
+		${details.confidence ? `<div class="claim-confidence"><span class="confidence ${details.confidence.toLowerCase()}">${details.confidence}</span></div>` : ''}
+		${details.explanation ? `<div class="claim-explanation"><span class="explanation-label">Issue:</span> ${details.explanation}</div>` : ''}
+		${details.improvement ? `<div class="claim-improvement"><span class="improvement-label">Suggested Improvement:</span> ${details.improvement}</div>` : ''}
+	</div>`;
 }
 
 /**

@@ -118,7 +118,25 @@ function getSystemPrompt(options) {
 		}
 
 		if (feedback.enableHighlightVagueClaims) {
-			prompt += `\n<h3>Unsubstantiated or Vague Claims</h3>\n<div class="analysis-section">Identify any claims that lack sufficient evidence, are overgeneralized, or use vague language. List them as bullet points with brief explanations of why each claim is problematic. Use <span class="vague-claim">highlighted text</span> for the actual claims.</div>\n`;
+			prompt += `\n<h3>Unsubstantiated or Vague Claims</h3>\n<div class="analysis-section vague-claims-section">
+			<p>I've identified the following vague or unsubstantiated claims in the content:</p>
+			<div class="claims-list">
+			`;
+
+			// Enhanced vague claims detection instructions
+			prompt += `For each vague claim you identify:
+			1. <div class="claim-item">
+			   <div class="claim-text"><span class="vague-claim">Quote the exact claim text</span></div>
+			   <div class="claim-type">Specify the type of issue (Unverifiable, Overgeneralization, Ambiguous language, Missing context, etc.)</div>
+			   <div class="claim-confidence">Indicate confidence level (High, Medium, Low)</div>
+			   <div class="claim-explanation">Explain briefly why this claim is problematic</div>
+			   <div class="claim-improvement">Suggest how the claim could be improved</div>
+			   </div>
+
+			Aim to identify 3-5 of the most significant vague or unsubstantiated claims in the content.
+			Format each claim as a separate div with the class "claim-item".
+			If there are no significant vague claims, clearly state this fact.
+			</div></div>\n`;
 		}
 
 		if (feedback.enableCounterpoints) {
