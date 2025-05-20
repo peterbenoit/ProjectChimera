@@ -19,6 +19,15 @@ const saveSettingsBtn = document.getElementById('save-settings');
 const apiKeyInput = document.getElementById('api-key');
 const themeSelect = document.getElementById('theme-select');
 
+// Add references to the new analysis divs
+const toneBiasDiv = document.getElementById('tone-bias');
+const highlightVagueClaimsDiv = document.getElementById('highlight-vague-claims');
+const counterpointsDiv = document.getElementById('counterpoints');
+const sentimentDetectionDiv = document.getElementById('sentiment-detection');
+const intentSummaryDiv = document.getElementById('intent-summary');
+const factContrastDiv = document.getElementById('fact-contrast');
+const additionalAnalysisContainer = document.getElementById('additional-analysis');
+
 let isInitialized = false;
 
 /**
@@ -432,87 +441,89 @@ function hideError() {
  * @param {string} summary - The summary text to display
  */
 function displaySummary(summary) {
-	let formattedSummary = summary;
+	let mainSummaryContent = summary;
+	let analysisContent = '';
 
-	console.log('Formatted summary:', formattedSummary);
+	// Clear previous content
+	if (summaryText) summaryText.innerHTML = '';
+	if (toneBiasDiv) toneBiasDiv.innerHTML = '';
+	if (highlightVagueClaimsDiv) highlightVagueClaimsDiv.innerHTML = '';
+	if (counterpointsDiv) counterpointsDiv.innerHTML = '';
+	if (sentimentDetectionDiv) sentimentDetectionDiv.innerHTML = '';
+	if (intentSummaryDiv) intentSummaryDiv.innerHTML = '';
+	if (factContrastDiv) factContrastDiv.innerHTML = '';
+	if (additionalAnalysisContainer) additionalAnalysisContainer.classList.add('hidden');
 
-	// Convert markdown bullet points to HTML before other processing
-	formattedSummary = convertMarkdownToHtml(formattedSummary);
 
-	// Clean up any excessive whitespace that might be causing padding issues
-	formattedSummary = formattedSummary.replace(/\s{2,}/g, ' ').trim();
+	// Separate main summary from additional analysis
+	const analysisMarker = 'ADDITIONAL ANALYSIS';
+	const analysisHeaderRegex = /<div class="analysis-header">ADDITIONAL ANALYSIS<\/div>/i;
 
-	if (summary.includes('ADDITIONAL ANALYSIS')) {
-		// Create a clear visual separator for the analysis section
-		formattedSummary = formattedSummary.replace(
-			'ADDITIONAL ANALYSIS',
-			'<div class="analysis-header">ADDITIONAL ANALYSIS</div>'
-		);
-
-		if (formattedSummary.includes('<h3>')) {
-			// Process each section individually
-			const mainContent = formattedSummary.split('<div class="analysis-header">')[0];
-			const analysisPart = '<div class="analysis-header">' + formattedSummary.split('<div class="analysis-header">')[1];
-
-			// Process the analysis sections
-			const sections = analysisPart.split('<h3>');
-			let processedSections = sections[0]; // This is the header
-
-			for (let i = 1; i < sections.length; i++) {
-				let section = sections[i];
-				const sectionTitle = section.split('</h3>')[0];
-
-				// Process specific section types
-				if (sectionTitle.includes('Unsubstantiated or Vague Claims') ||
-					sectionTitle.includes('Tone and Bias Analysis')) {
-					// Add the h3 tag outside the processed section
-					processedSections += `<h3>${sectionTitle}</h3>`;
-					// Process vague claims without adding another h3 tag
-					processedSections += processVagueClaimsSection(section);
-				} else {
-					// Regular processing for other sections
-					processedSections += `<h3>${sectionTitle}</h3>`;
-					processedSections += section
-						.split('</h3>')[1]  // Only take content after the closing h3
-						.replace(
-							/(?:(?:\r\n|\r|\n)(?:\s*[•\-\*]\s+)(.+))+/g,
-							function (match) {
-								const items = match.split(/\r\n|\r|\n/)
-									.filter(line => line.trim().match(/^\s*[•\-\*]/))
-									.map(line => line.replace(/^\s*[•\-\*]\s+/, ''))
-									.map(line => `<li>${line}</li>`)
-									.join('');
-								return `<ul>${items}</ul>`;
-							}
-						);
-				}
-			}
-
-			// Combine the main content with processed analysis sections
-			formattedSummary = mainContent + processedSections;
+	if (summary.includes(analysisMarker) || analysisHeaderRegex.test(summary)) {
+		let parts;
+		if (analysisHeaderRegex.test(summary)) {
+			parts = summary.split(analysisHeaderRegex);
+		} else {
+			parts = summary.split(new RegExp(`\\s*${analysisMarker}\\s*`, 'i'));
+		}
+		mainSummaryContent = parts[0];
+		if (parts.length > 1) {
+			analysisContent = parts[1];
 		}
 	}
 
-	// Set the HTML content
+	// Display main summary
 	if (summaryText) {
-		// Ensure consistent spacing in the output HTML
-		formattedSummary = formattedSummary
-			.replace(/>\s+</g, '><') // Remove whitespace between tags
-			.replace(/(<div|<p|<h3)/g, '\n$1') // Add newlines before block elements for readability
-			.replace(/(<\/div>|<\/p>|<\/h3>)/g, '$1\n'); // Add newlines after block elements
+		summaryText.innerHTML = convertMarkdownToHtml(mainSummaryContent.trim());
+	}
 
-		summaryText.innerHTML = formattedSummary;
+	// Process and display additional analysis if present
+	if (analysisContent.trim()) {
+		if (additionalAnalysisContainer) additionalAnalysisContainer.classList.remove('hidden');
 
-		// Add event listeners to any claim items
-		const claimItems = summaryText.querySelectorAll('.claim-item');
+		// Split analysis content into sections based on <h3> tags
+		const sectionSplitRegex = /(<h3>.*?<\/h3>)/i;
+		const sections = analysisContent.split(sectionSplitRegex).filter(s => s.trim() !== '');
+
+		for (let i = 0; i < sections.length; i += 2) {
+			const headerHtml = sections[i];
+			const contentHtml = sections[i + 1] || '';
+
+			// Extract header text for matching
+			const tempHeader = document.createElement('div');
+			tempHeader.innerHTML = headerHtml;
+			const headerText = tempHeader.textContent || tempHeader.innerText || "";
+
+
+			if (headerText.includes('Tone and Bias Analysis')) {
+				if (toneBiasDiv) toneBiasDiv.innerHTML = headerHtml + convertMarkdownToHtml(contentHtml);
+			} else if (headerText.includes('Unsubstantiated or Vague Claims') || headerText.includes('Highlight Unsubstantiated or Vague Claims')) {
+				if (highlightVagueClaimsDiv) {
+					// The processVagueClaimsSection expects the content part, not the header
+					// It will generate its own structure including a title if needed or just the list
+					highlightVagueClaimsDiv.innerHTML = headerHtml + processVagueClaimsSection(contentHtml);
+				}
+			} else if (headerText.includes('Counterpoints') || headerText.includes('Alternative Perspectives')) {
+				if (counterpointsDiv) counterpointsDiv.innerHTML = headerHtml + convertMarkdownToHtml(contentHtml);
+			} else if (headerText.includes('Sentiment Detection') || headerText.includes('Sentiment toward Mentioned Entities')) {
+				if (sentimentDetectionDiv) sentimentDetectionDiv.innerHTML = headerHtml + convertMarkdownToHtml(contentHtml);
+			} else if (headerText.includes('Intent Summary') || headerText.includes('Intent of the Page')) {
+				if (intentSummaryDiv) intentSummaryDiv.innerHTML = headerHtml + convertMarkdownToHtml(contentHtml);
+			} else if (headerText.includes('Fact Contrast') || headerText.includes('Contrast with Known Facts')) {
+				if (factContrastDiv) factContrastDiv.innerHTML = headerHtml + convertMarkdownToHtml(contentHtml);
+			} else {
+				// Fallback for unknown sections, append to a general area or log
+				console.warn('Unknown analysis section:', headerText);
+				// Optionally, append to a default analysis div or the main summary text
+			}
+		}
+
+		// Add event listeners to any claim items after populating vague claims
+		const claimItems = document.querySelectorAll('.claim-item');
 		claimItems.forEach(item => {
-			// Add expand/collapse functionality
 			item.addEventListener('click', function (e) {
 				if (e.target.closest('.claim-text')) {
-					// Toggle visibility of details
 					this.classList.toggle('expanded');
-
-					// Toggle a class on child elements to control their visibility
 					const details = this.querySelectorAll('.claim-type, .claim-confidence, .claim-explanation, .claim-improvement');
 					details.forEach(el => {
 						el.classList.toggle('expanded');
@@ -522,7 +533,7 @@ function displaySummary(summary) {
 		});
 	}
 
-	// Show the container and hide loading
+
 	if (summaryContent) {
 		summaryContent.classList.remove('hidden');
 	}
@@ -603,19 +614,8 @@ function processVagueClaimsSection(section) {
 	// Clean up any excessive whitespace that might be causing padding issues
 	section = section.replace(/\s{2,}/g, ' ').trim();
 
-	// Split out the end tag to keep the section enclosed properly
-	const parts = section.split('</h3>');
-	if (parts.length < 2) return section;
-
-	// Get just the title text without the tag
-	const titleText = parts[0].trim();
-	let content = parts[1];
-
-	// Clean up any additional closing tags
-	content = content.replace(/<\/div><\/div>$/, '');
-
 	// If no vague claims were found
-	if (content.includes('No significant vague claims') || content.includes('no significant vague claims')) {
+	if (section.toLowerCase().includes('no significant vague claims') || section.toLowerCase().includes('no significant vague or unsubstantiated claims')) {
 		return `
         <div class="analysis-section vague-claims-section">
             <p class="no-claims">No significant vague or unsubstantiated claims were identified in this content.</p>
@@ -625,26 +625,26 @@ function processVagueClaimsSection(section) {
 	// Create a clean structure for the claims section
 	let formattedContent = `
     <div class="analysis-section vague-claims-section">
-        <p class="section-intro">I've identified the following vague or unsubstantiated claims in the content:</p>
+        <p class="section-intro">The following vague or unsubstantiated claims were identified:</p>
         <div class="claims-list">`;
 
 	// First, try to find claims using numbered patterns
 	// Look for patterns like: 1. "Nvidia isn't opening the interconnect standard entirely" (Lack of Clarity, Medium)
-	const claimPattern = /(\d+)\.\s+"([^"]+)"\s*(?:\(([^)]+)(?:,\s*([^)]+))?\))?/g;
+	const claimPattern = /(\d+)\.\s*"([^"]+)"\s*(?:\(([^)]+)(?:,\s*([^)]+))?\))?/g;
 	let match;
 	let claimNumber = 1;
 	let hasMatches = false;
 
 	// Find claim patterns in the content
-	while ((match = claimPattern.exec(content)) !== null) {
+	while ((match = claimPattern.exec(section)) !== null) {
 		hasMatches = true;
 		const [, , claimText, claimType = '', confidence = ''] = match;
 
 		// Get explanation and improvement text that follows this claim
 		const startPos = match.index + match[0].length;
-		const nextClaimMatch = content.substring(startPos).match(/\d+\.\s+"[^"]+"/);
-		const endPos = nextClaimMatch ? startPos + nextClaimMatch.index : content.length;
-		const followingText = content.substring(startPos, endPos);
+		const nextClaimMatch = section.substring(startPos).match(/\d+\.\s+"[^"]+"/);
+		const endPos = nextClaimMatch ? startPos + nextClaimMatch.index : section.length;
+		const followingText = section.substring(startPos, endPos);
 
 		// Extract explanation and improvement from the following text
 		const explanation = extractExplanation(followingText);
@@ -656,9 +656,9 @@ function processVagueClaimsSection(section) {
 	}
 
 	// If no matches were found using pattern matching, try to parse the content directly
-	if (!hasMatches && content.length > 30) {
+	if (!hasMatches && section.length > 30) {
 		// Try to find claim sections based on the HTML structure
-		const claimSections = content.match(/<li>[\s\S]*?<\/li>/g);
+		const claimSections = section.match(/<li>[\s\S]*?<\/li>/g);
 
 		if (claimSections && claimSections.length > 0) {
 			claimSections.forEach((section, index) => {
@@ -689,7 +689,7 @@ function processVagueClaimsSection(section) {
 	// If we still don't have matches, use a more liberal approach to find claims
 	if (!hasMatches) {
 		// Find paragraphs that might contain claims
-		const paragraphs = content.split(/(?:<p>|<div>)/);
+		const paragraphs = section.split(/(?:<p>|<div>)/);
 		paragraphs.forEach((para, index) => {
 			if (para.includes('"') && para.length > 30) {
 				const quoteMatch = para.match(/"([^"]+)"/);
@@ -705,8 +705,7 @@ function processVagueClaimsSection(section) {
         </div>
     </div>`;
 
-	// Return the section without wrapping it in an h3 tag
-	// The h3 will be handled by the calling function
+	// Return the section content, the H3 will be added by the caller if needed
 	return formattedContent;
 }
 
