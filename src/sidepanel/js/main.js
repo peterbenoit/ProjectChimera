@@ -461,15 +461,19 @@ function displaySummary(summary) {
 			for (let i = 1; i < sections.length; i++) {
 				let section = sections[i];
 				const sectionTitle = section.split('</h3>')[0];
-				let sectionContent = '<h3>' + sectionTitle + '</h3>';
 
 				// Process specific section types
-				if (sectionTitle.includes('Unsubstantiated or Vague Claims')) {
-					// Process vague claims with the enhanced function
-					sectionContent += processVagueClaimsSection(section);
+				if (sectionTitle.includes('Unsubstantiated or Vague Claims') ||
+					sectionTitle.includes('Tone and Bias Analysis')) {
+					// Add the h3 tag outside the processed section
+					processedSections += `<h3>${sectionTitle}</h3>`;
+					// Process vague claims without adding another h3 tag
+					processedSections += processVagueClaimsSection(section);
 				} else {
 					// Regular processing for other sections
-					sectionContent += section
+					processedSections += `<h3>${sectionTitle}</h3>`;
+					processedSections += section
+						.split('</h3>')[1]  // Only take content after the closing h3
 						.replace(
 							/(?:(?:\r\n|\r|\n)(?:\s*[•\-\*]\s+)(.+))+/g,
 							function (match) {
@@ -482,9 +486,6 @@ function displaySummary(summary) {
 							}
 						);
 				}
-
-				// Replace the section with its processed version
-				processedSections += sectionContent.replace(/<h3>[\s\S]*?<\/h3>/, ''); // Remove duplicate h3
 			}
 
 			// Combine the main content with processed analysis sections
@@ -606,8 +607,8 @@ function processVagueClaimsSection(section) {
 	const parts = section.split('</h3>');
 	if (parts.length < 2) return section;
 
-	// Add proper heading formatting
-	let header = parts[0] + '</h3>';
+	// Get just the title text without the tag
+	const titleText = parts[0].trim();
 	let content = parts[1];
 
 	// Clean up any additional closing tags
@@ -615,21 +616,21 @@ function processVagueClaimsSection(section) {
 
 	// If no vague claims were found
 	if (content.includes('No significant vague claims') || content.includes('no significant vague claims')) {
-		return `${header}
-		<div class="analysis-section vague-claims-section">
-			<p class="no-claims">No significant vague or unsubstantiated claims were identified in this content.</p>
-		</div>`;
+		return `
+        <div class="analysis-section vague-claims-section">
+            <p class="no-claims">No significant vague or unsubstantiated claims were identified in this content.</p>
+        </div>`;
 	}
 
 	// Create a clean structure for the claims section
 	let formattedContent = `
-	<div class="analysis-section vague-claims-section">
-		<p class="section-intro">I've identified the following vague or unsubstantiated claims in the content:</p>
-		<div class="claims-list">`;
+    <div class="analysis-section vague-claims-section">
+        <p class="section-intro">I've identified the following vague or unsubstantiated claims in the content:</p>
+        <div class="claims-list">`;
 
-	// Extract each claim using regex pattern matching
-	// Look for patterns like: 1. "NLWeb may have its origins..." (Unverifiable, Medium)
-	const claimPattern = /(\d+)\.\s+"([^"]+)"\s*(?:\(([^,]+),\s*([^)]+)\))?/g;
+	// First, try to find claims using numbered patterns
+	// Look for patterns like: 1. "Nvidia isn't opening the interconnect standard entirely" (Lack of Clarity, Medium)
+	const claimPattern = /(\d+)\.\s+"([^"]+)"\s*(?:\(([^)]+)(?:,\s*([^)]+))?\))?/g;
 	let match;
 	let claimNumber = 1;
 	let hasMatches = false;
@@ -645,103 +646,160 @@ function processVagueClaimsSection(section) {
 		const endPos = nextClaimMatch ? startPos + nextClaimMatch.index : content.length;
 		const followingText = content.substring(startPos, endPos);
 
-		// Extract explanation and improvement from the text
-		const explanationMatch = followingText.match(/(?:The statement|This claim|◦ Explanation:)\s*([^\.]+\.(?:[^-]+)?)/i);
-		const improvementMatch = followingText.match(/(?:To improve|◦ Improvement:)\s*([^\.]+\.(?:[^-]+)?)/i);
+		// Extract explanation and improvement from the following text
+		const explanation = extractExplanation(followingText);
+		const improvement = extractImprovement(followingText);
 
-		const explanation = explanationMatch ? explanationMatch[1].trim() : '';
-		const improvement = improvementMatch ? improvementMatch[1].trim() : '';
-
-		// Format a clean claim item
-		formattedContent += `
-			<div class="claim-item">
-				<div class="claim-number">${claimNumber}.</div>
-				<div class="claim-text">"${claimText.trim()}"</div>
-				${claimType ? `<div class="claim-type"><span class="type-label">Type:</span> <span class="type-value">${claimType.trim()}</span></div>` : ''}
-				${confidence ? `<div class="claim-confidence"><span class="confidence ${confidence.toLowerCase().trim()}">${confidence.trim()} Confidence</span></div>` : ''}
-				${explanation ? `<div class="claim-explanation"><span class="explanation-label">Issue:</span> ${explanation}</div>` : ''}
-				${improvement ? `<div class="claim-improvement"><span class="improvement-label">Suggested Improvement:</span> ${improvement}</div>` : ''}
-			</div>`;
-
+		// Format a clean claim item matching the structure in the screenshot
+		formattedContent += formatClaimItem(claimNumber, claimText, claimType, confidence, explanation, improvement);
 		claimNumber++;
 	}
 
-	// If no matches were found but we have content, try an alternative processing approach
+	// If no matches were found using pattern matching, try to parse the content directly
 	if (!hasMatches && content.length > 30) {
-		// Look for any circle bullet points that might indicate claim details
-		const bulletPoints = content.match(/◦\s+([^:]+):\s+([^\n]+)/g);
+		// Try to find claim sections based on the HTML structure
+		const claimSections = content.match(/<li>[\s\S]*?<\/li>/g);
 
-		if (bulletPoints && bulletPoints.length > 0) {
-			// Process structured bullet points
-			let currentClaim = null;
-			let claimDetails = {};
+		if (claimSections && claimSections.length > 0) {
+			claimSections.forEach((section, index) => {
+				// Extract components from the claim section
+				const claimMatch = section.match(/"([^"]+)"/);
+				if (claimMatch) {
+					const claimText = claimMatch[1].trim();
 
-			bulletPoints.forEach(bullet => {
-				const parts = bullet.match(/◦\s+([^:]+):\s+(.+)/);
-				if (parts) {
-					const [, key, value] = parts;
+					const typeMatch = section.match(/<div class="claim-type">([^<]+)<\/div>/);
+					const claimType = typeMatch ? typeMatch[1].replace('Type:', '').trim() : '';
 
-					if (key.includes('Type')) {
-						// This is likely the start of a new claim
-						if (currentClaim) {
-							// Add the previous claim
-							formattedContent += formatClaimFromDetails(claimNumber++, claimDetails);
-							claimDetails = {};
-						}
+					const confidenceMatch = section.match(/<div class="claim-confidence">([^<]+)<\/div>/);
+					const confidence = confidenceMatch ? confidenceMatch[1].replace('Confidence:', '').trim() : '';
 
-						const claimMatch = content.match(new RegExp(`(\\d+)\\.\s+"([^"]+)"\\s*`));
-						currentClaim = claimMatch ? claimMatch[2] : `Claim ${claimNumber}`;
-						claimDetails.text = currentClaim;
-						claimDetails.type = value.trim();
-					} else if (key.includes('Confidence')) {
-						claimDetails.confidence = value.trim();
-					} else if (key.includes('Explanation')) {
-						claimDetails.explanation = value.trim();
-					} else if (key.includes('Improvement')) {
-						claimDetails.improvement = value.trim();
-					}
+					const explanationMatch = section.match(/<div class="claim-explanation">([^<]+)<\/div>/);
+					const explanation = explanationMatch ? explanationMatch[1].replace('Issue:', '').trim() : '';
+
+					const improvementMatch = section.match(/<div class="claim-improvement">([^<]+)<\/div>/);
+					const improvement = improvementMatch ? improvementMatch[1].replace('Suggested Improvement:', '').trim() : '';
+
+					formattedContent += formatClaimItem(claimNumber++, claimText, claimType, confidence, explanation, improvement);
 				}
 			});
-
-			// Add the last claim if it exists
-			if (Object.keys(claimDetails).length > 0) {
-				formattedContent += formatClaimFromDetails(claimNumber, claimDetails);
-			}
-
 			hasMatches = true;
-		} else {
-			// Fall back to general content cleaning
-			content = content.replace(/- This claim/g, '<div class="claim-explanation"><span class="explanation-label">Issue:</span>')
-				.replace(/- To improve,/g, '<div class="claim-improvement"><span class="improvement-label">Suggested Improvement:</span>')
-				.replace(/\.\s+(?=<)/g, '.</div> ');
-
-			formattedContent += content;
 		}
 	}
 
-	formattedContent += `
-		</div>
-	</div>`;
+	// If we still don't have matches, use a more liberal approach to find claims
+	if (!hasMatches) {
+		// Find paragraphs that might contain claims
+		const paragraphs = content.split(/(?:<p>|<div>)/);
+		paragraphs.forEach((para, index) => {
+			if (para.includes('"') && para.length > 30) {
+				const quoteMatch = para.match(/"([^"]+)"/);
+				if (quoteMatch) {
+					const claimText = quoteMatch[1];
+					formattedContent += formatClaimItem(claimNumber++, claimText, 'Unspecified', '', '', '');
+				}
+			}
+		});
+	}
 
-	return header + formattedContent;
+	formattedContent += `
+        </div>
+    </div>`;
+
+	// Return the section without wrapping it in an h3 tag
+	// The h3 will be handled by the calling function
+	return formattedContent;
 }
 
 /**
- * Format a claim from extracted details
+ * Extract explanation text from a claim's following text
+ * @param {string} text - The text following a claim
+ * @returns {string} - The extracted explanation
+ */
+function extractExplanation(text) {
+	const patterns = [
+		/The statement lacks clarity on (.+?)(?=\.|\n|$)/i,
+		/This claim (.+?)(?=\.|\n|$)/i,
+		/Issue: (.+?)(?=\.|\n|$)/i,
+		/Explanation: (.+?)(?=\.|\n|$)/i
+	];
+
+	for (const pattern of patterns) {
+		const match = text.match(pattern);
+		if (match && match[1]) {
+			return match[1].trim() + '.';
+		}
+	}
+
+	return '';
+}
+
+/**
+ * Extract improvement suggestion from a claim's following text
+ * @param {string} text - The text following a claim
+ * @returns {string} - The extracted improvement suggestion
+ */
+function extractImprovement(text) {
+	const patterns = [
+		/To improve,? (.+?)(?=\.|\n|$)/i,
+		/Suggested improvement: (.+?)(?=\.|\n|$)/i,
+		/Improvement: (.+?)(?=\.|\n|$)/i
+	];
+
+	for (const pattern of patterns) {
+		const match = text.match(pattern);
+		if (match && match[1]) {
+			return match[1].trim() + '.';
+		}
+	}
+
+	return '';
+}
+
+/**
+ * Format a claim item with consistent structure
+ * @param {number} number - Claim number
+ * @param {string} text - Claim text
+ * @param {string} type - Claim type
+ * @param {string} confidence - Confidence level
+ * @param {string} explanation - Explanation text
+ * @param {string} improvement - Improvement suggestion
+ * @returns {string} - Formatted HTML for the claim
+ */
+function formatClaimItem(number, text, type, confidence, explanation, improvement) {
+	// Clean up and normalize the inputs
+	text = text ? text.trim() : '';
+	type = type ? type.trim() : '';
+	confidence = confidence ? confidence.trim() : '';
+
+	// Handle different confidence formats
+	let confidenceClass = confidence ? confidence.toLowerCase().replace(/\s+/g, '-') : '';
+
+	return `
+    <div class="claim-item">
+        <div class="claim-number">${number}.</div>
+        <div class="claim-text">"${text}"</div>
+        ${type ? `<div class="claim-type"><span class="type-label">Type:</span> <span class="type-value">${type}</span></div>` : ''}
+        ${confidence ? `<div class="claim-confidence"><span class="confidence ${confidenceClass}">${confidence}</span></div>` : ''}
+        ${explanation ? `<div class="claim-explanation"><span class="explanation-label">Issue:</span> ${explanation}</div>` : ''}
+        ${improvement ? `<div class="claim-improvement"><span class="improvement-label">Suggested Improvement:</span> ${improvement}</div>` : ''}
+    </div>`;
+}
+
+/**
+ * Format a claim from extracted details (helper for alternative parsing)
  * @param {number} number - The claim number
  * @param {Object} details - The claim details
  * @returns {string} - Formatted HTML for the claim
  */
 function formatClaimFromDetails(number, details) {
-	return `
-	<div class="claim-item">
-		<div class="claim-number">${number}.</div>
-		<div class="claim-text">"${details.text || 'Unspecified claim'}"</div>
-		${details.type ? `<div class="claim-type"><span class="type-label">Type:</span> <span class="type-value">${details.type}</span></div>` : ''}
-		${details.confidence ? `<div class="claim-confidence"><span class="confidence ${details.confidence.toLowerCase()}">${details.confidence}</span></div>` : ''}
-		${details.explanation ? `<div class="claim-explanation"><span class="explanation-label">Issue:</span> ${details.explanation}</div>` : ''}
-		${details.improvement ? `<div class="claim-improvement"><span class="improvement-label">Suggested Improvement:</span> ${details.improvement}</div>` : ''}
-	</div>`;
+	return formatClaimItem(
+		number,
+		details.text || 'Unspecified claim',
+		details.type || '',
+		details.confidence || '',
+		details.explanation || '',
+		details.improvement || ''
+	);
 }
 
 /**
