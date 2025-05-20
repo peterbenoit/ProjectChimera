@@ -497,3 +497,65 @@ input:checked+.toggle-slider:before {
 .confirmation-buttons button {
 	min-width: 80px;
 }
+
+/* AI Analysis Styling */
+.analysis-header {
+	font-size: 16px;
+	font-weight: 600;
+	/* margin-top: var(--spacing-xl);
+	margin-bottom: var(--spacing-md); */
+	padding-top: var(--spacing-md);
+	border-top: 1px solid var(--border-color);
+	color: var(--accent-color);
+}
+
+#summary-text h3 {
+	font-size: 14px;
+	font-weight: 600;
+	/* margin-top: var(--spacing-md); */
+	margin-bottom: var(--spacing-xs);
+	color: var(--text-primary);
+}
+
+/* Additional AI Analysis styling */
+#summary-text .analysis-section {
+	background-color: rgba(79, 109, 245, 0.05);
+	border-radius: var(--border-radius);
+	padding: var(--spacing-md);
+	margin-bottom: var(--spacing-md);
+}
+
+#summary-text ul {
+	padding-left: var(--spacing-lg);
+	margin-top: var(--spacing-xs);
+	margin-bottom: var(--spacing-md);
+}
+
+#summary-text li {
+	margin-bottom: var(--spacing-xs);
+}
+
+/* Entity sentiment styling */
+.entity-positive {
+	color: var(--success-color);
+	font-weight: 500;
+}
+
+.entity-negative {
+	color: var(--error-color);
+	font-weight: 500;
+}
+
+.entity-neutral {
+	color: var(--text-secondary);
+	font-style: italic;
+}
+
+/* Vague claims highlight */
+.vague-claim {
+	background-color: rgba(229, 57, 53, 0.1);
+	padding: 0 var(--spacing-xs);
+	border-radius: 2px;
+}
+
+/* Confirmation Dialog Styling */

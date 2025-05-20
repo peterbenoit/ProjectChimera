@@ -122,13 +122,59 @@
                     </div>
 
                     <div class="settings-group">
-                        <h3>Content Script</h3>
+                        <h3>Extension</h3>
                         <div class="setting-item">
                             <label class="toggle-switch">
                                 <input type="checkbox" id="enable-content-script" checked />
                                 <span class="toggle-slider"></span>
                             </label>
-                            <span>Enable content script on all pages</span>
+                            <span>Enable extension on all pages</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3>AI Feedback & Impressions</h3>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enable-tone-bias-analysis" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>Offer tone and bias analysis of content</span>
+                        </div>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enable-highlight-vague-claims" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>Highlight unsubstantiated or vague claims</span>
+                        </div>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enable-counterpoints" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>Present counterpoints or alternative perspectives</span>
+                        </div>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enable-sentiment-detection" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>Detect sentiment toward mentioned entities</span>
+                        </div>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enable-intent-summary" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>Summarize intent of the page</span>
+                        </div>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enable-fact-contrast" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>Include contrast with known facts (opt-in)</span>
                         </div>
                     </div>
 
@@ -137,7 +183,7 @@
             </main>
 
             <footer class="app-footer">
-                <p>Project Chimera v1.0.0</p>
+                <p>Project Chimera v1.0.1</p>
             </footer>
         </div>
     </body>
