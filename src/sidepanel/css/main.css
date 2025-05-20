@@ -519,6 +519,15 @@ input:checked+.toggle-slider:before {
 	padding-bottom: var(--spacing-xs);
 }
 
+#summary-text strong {
+	display: block;
+	font-size: 14px;
+	font-weight: 500;
+	margin-top: var(--spacing-md);
+	margin-bottom: var(--spacing-sm);
+	color: var(--text-primary);
+}
+
 /* Additional AI Analysis styling */
 #summary-text .analysis-section {
 	background-color: rgba(79, 109, 245, 0.05);
@@ -529,6 +538,10 @@ input:checked+.toggle-slider:before {
 
 #summary-text .vague-claims-section {
 	margin-top: var(--spacing-xs);
+	background-color: rgba(245, 245, 245, 0.5);
+	border-radius: var(--border-radius);
+	padding: var(--spacing-md);
+	border-left: 3px solid var(--accent-color);
 }
 
 #summary-text .vague-claims-section p {
