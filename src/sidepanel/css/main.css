@@ -419,6 +419,7 @@ input:checked+.toggle-slider:before {
 	border-radius: var(--border-radius);
 	padding: var(--spacing-md);
 	margin-bottom: var(--spacing-md);
+	overflow-x: hidden;
 }
 
 .history-item-header {
@@ -472,10 +473,14 @@ input:checked+.toggle-slider:before {
 .history-item-url {
 	font-size: 12px;
 	color: var(--accent-color);
+	display: block;
+	max-width: 100%;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	margin-bottom: var(--spacing-sm);
+	min-width: 0;
+	flex-shrink: 1;
 }
 
 .history-item-content {
