@@ -202,12 +202,51 @@ select {
 
 #summary-text {
 	line-height: 1.6;
-	white-space: pre-wrap;
 }
 
 #summary-text ol {
-	padding-left: 1rem;
+	padding-left: var(--spacing-lg);
+	padding-right: var(--spacing-md);
 	margin-left: 0;
+}
+
+#summary-text ol>li>ul {
+	background-color: rgba(255, 255, 255, 0.9);
+	/* border-left: 3px solid var(--accent-color); */
+	padding: var(--spacing-sm) var(--spacing-md);
+	padding-left: var(--spacing-lg);
+	/* Increased left padding for inset effect */
+	margin-top: var(--spacing-xs);
+	margin-bottom: var(--spacing-md);
+	border-radius: var(--border-radius);
+
+}
+
+/* #summary-text ol>li>ul>li::before {
+	content: "• ";
+	color: var(--text-secondary);
+} */
+
+#summary-text ol>li>ul>li {
+	margin-bottom: var(--spacing-xs);
+	font-size: 11px;
+	line-height: 1.4;
+}
+
+#summary-text ol>li>ul {
+	margin-bottom: var(--spacing-md);
+	font-weight: 400;
+}
+
+#summary-text ol>li {
+	margin-bottom: var(--spacing-md);
+	font-weight: 500;
+	color: var(--text-primary);
+}
+
+#summary-text ol>li::marker {
+	font-weight: 600;
+	color: var(--accent-color);
 }
 
 #loading-indicator {
