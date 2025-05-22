@@ -1,6 +1,7 @@
 /**
  * Main JavaScript for Project Chimera SidePanel
  */
+import { marked } from 'marked';
 import { generateSummary } from '../../shared/api.js';
 import { saveSummaryToHistory, getSummaryHistory, deleteSummaryFromHistory, clearSummaryHistory } from '../../shared/storage.js';
 
@@ -162,6 +163,8 @@ async function handleSummarizeClick() {
 			{ format, length, feedback: feedbackSettings },
 			settings.apiKey
 		);
+
+		console.log('Generated summary:', summary);
 
 		displaySummary(summary);
 
@@ -441,106 +444,19 @@ function hideError() {
  * @param {string} summary - The summary text to display
  */
 function displaySummary(summary) {
-	let mainSummaryContent = summary;
-	let analysisContent = '';
+	summaryText.innerHTML = convertMarkdownToHtml(summary.trim());
 
-	// Clear previous content
-	if (summaryText) summaryText.innerHTML = '';
-	if (toneBiasDiv) toneBiasDiv.innerHTML = '';
-	if (highlightVagueClaimsDiv) highlightVagueClaimsDiv.innerHTML = '';
-	if (counterpointsDiv) counterpointsDiv.innerHTML = '';
-	if (sentimentDetectionDiv) sentimentDetectionDiv.innerHTML = '';
-	if (intentSummaryDiv) intentSummaryDiv.innerHTML = '';
-	if (factContrastDiv) factContrastDiv.innerHTML = '';
-	if (additionalAnalysisContainer) additionalAnalysisContainer.classList.add('hidden');
+	// Hide analysis sections
+	toneBiasDiv.classList.add('hidden');
+	highlightVagueClaimsDiv.classList.add('hidden');
+	counterpointsDiv.classList.add('hidden');
+	sentimentDetectionDiv.classList.add('hidden');
+	intentSummaryDiv.classList.add('hidden');
+	factContrastDiv.classList.add('hidden');
+	additionalAnalysisContainer.classList.add('hidden');
 
-
-	// Separate main summary from additional analysis
-	const analysisMarker = 'ADDITIONAL ANALYSIS';
-	const analysisHeaderRegex = /<div class="analysis-header">ADDITIONAL ANALYSIS<\/div>/i;
-
-	if (summary.includes(analysisMarker) || analysisHeaderRegex.test(summary)) {
-		let parts;
-		if (analysisHeaderRegex.test(summary)) {
-			parts = summary.split(analysisHeaderRegex);
-		} else {
-			parts = summary.split(new RegExp(`\\s*${analysisMarker}\\s*`, 'i'));
-		}
-		mainSummaryContent = parts[0];
-		if (parts.length > 1) {
-			analysisContent = parts[1];
-		}
-	}
-
-	// Display main summary
-	if (summaryText) {
-		summaryText.innerHTML = convertMarkdownToHtml(mainSummaryContent.trim());
-	}
-
-	// Process and display additional analysis if present
-	if (analysisContent.trim()) {
-		if (additionalAnalysisContainer) additionalAnalysisContainer.classList.remove('hidden');
-
-		// Split analysis content into sections based on <h3> tags
-		const sectionSplitRegex = /(<h3>.*?<\/h3>)/i;
-		const sections = analysisContent.split(sectionSplitRegex).filter(s => s.trim() !== '');
-
-		for (let i = 0; i < sections.length; i += 2) {
-			const headerHtml = sections[i];
-			const contentHtml = sections[i + 1] || '';
-
-			// Extract header text for matching
-			const tempHeader = document.createElement('div');
-			tempHeader.innerHTML = headerHtml;
-			const headerText = tempHeader.textContent || tempHeader.innerText || "";
-
-
-			if (headerText.includes('Tone and Bias Analysis')) {
-				if (toneBiasDiv) toneBiasDiv.innerHTML = headerHtml + convertMarkdownToHtml(contentHtml);
-			} else if (headerText.includes('Unsubstantiated or Vague Claims') || headerText.includes('Highlight Unsubstantiated or Vague Claims')) {
-				if (highlightVagueClaimsDiv) {
-					// The processVagueClaimsSection expects the content part, not the header
-					// It will generate its own structure including a title if needed or just the list
-					highlightVagueClaimsDiv.innerHTML = headerHtml + processVagueClaimsSection(contentHtml);
-				}
-			} else if (headerText.includes('Counterpoints') || headerText.includes('Alternative Perspectives')) {
-				if (counterpointsDiv) counterpointsDiv.innerHTML = headerHtml + convertMarkdownToHtml(contentHtml);
-			} else if (headerText.includes('Sentiment Detection') || headerText.includes('Sentiment toward Mentioned Entities')) {
-				if (sentimentDetectionDiv) sentimentDetectionDiv.innerHTML = headerHtml + convertMarkdownToHtml(contentHtml);
-			} else if (headerText.includes('Intent Summary') || headerText.includes('Intent of the Page')) {
-				if (intentSummaryDiv) intentSummaryDiv.innerHTML = headerHtml + convertMarkdownToHtml(contentHtml);
-			} else if (headerText.includes('Fact Contrast') || headerText.includes('Contrast with Known Facts')) {
-				if (factContrastDiv) factContrastDiv.innerHTML = headerHtml + convertMarkdownToHtml(contentHtml);
-			} else {
-				// Fallback for unknown sections, append to a general area or log
-				console.warn('Unknown analysis section:', headerText);
-				// Optionally, append to a default analysis div or the main summary text
-			}
-		}
-
-		// Add event listeners to any claim items after populating vague claims
-		const claimItems = document.querySelectorAll('.claim-item');
-		claimItems.forEach(item => {
-			item.addEventListener('click', function (e) {
-				if (e.target.closest('.claim-text')) {
-					this.classList.toggle('expanded');
-					const details = this.querySelectorAll('.claim-type, .claim-confidence, .claim-explanation, .claim-improvement');
-					details.forEach(el => {
-						el.classList.toggle('expanded');
-					});
-				}
-			});
-		});
-	}
-
-
-	if (summaryContent) {
-		summaryContent.classList.remove('hidden');
-	}
-
-	if (loadingIndicator) {
-		loadingIndicator.classList.add('hidden');
-	}
+	summaryContent.classList.remove('hidden');
+	loadingIndicator.classList.add('hidden');
 }
 
 /**
@@ -549,60 +465,13 @@ function displaySummary(summary) {
  * @returns {string} - The converted HTML
  */
 function convertMarkdownToHtml(text) {
-	// Safety check for null or undefined text
 	if (!text) return '';
-
-	let converted = text;
-
 	try {
-		// Convert bullet points to HTML list
-		converted = converted.replace(/(?:^|\n)(\s*[•\-\*]\s+.*(?:\n\s+[^•\-\*].*)*)+/gm, function (match) {
-			if (!match) return '';
-
-			const items = match.split(/\n/)
-				.filter(line => line && line.trim())
-				.map(line => {
-					// Check if this is a bullet point
-					if (line && line.trim().match(/^\s*[•\-\*]/)) {
-						return `<li>${line.replace(/^\s*[•\-\*]\s+/, '')}</li>`;
-					}
-					// This is a continuation of the previous bullet point
-					return line;
-				})
-				.join('');
-			return `<ul>${items}</ul>`;
-		});
-
-		// Convert numbered lists to HTML ordered lists
-		converted = converted.replace(/(?:^|\n)(\s*\d+\.\s+.*(?:\n\s+[^\d\.].*)*)+/gm, function (match) {
-			if (!match) return '';
-
-			const items = match.split(/\n/)
-				.filter(line => line && line.trim())
-				.map(line => {
-					// Check if this is a numbered item
-					if (line && line.trim().match(/^\s*\d+\.\s+/)) {
-						return `<li>${line.replace(/^\s*\d+\.\s+/, '')}</li>`;
-					}
-					// This is a continuation of the previous numbered item
-					return line;
-				})
-				.join('');
-			return `<ol>${items}</ol>`;
-		});
-
-		// Convert bold markdown to HTML
-		converted = converted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-
-		// Convert italic markdown to HTML
-		converted = converted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+		return marked.parse(text.trim());
 	} catch (error) {
-		console.error('Error converting markdown to HTML:', error);
-		// Return the original text if an error occurs
+		console.error('Error parsing markdown with marked:', error);
 		return text;
 	}
-
-	return converted;
 }
 
 /**

@@ -98,7 +98,7 @@ function getSystemPrompt(options) {
 
 	// Format-specific instructions
 	if (format === 'bullets') {
-		prompt += `Format your response as a bulleted list of key points, with a very brief introduction. Use • as bullet points. Be direct and clear. `;
+		prompt += `Format your response as a bulleted list of key points, with a very brief introduction. Use - as bullet points. Be direct and clear. `;
 	} else if (format === 'academic') {
 		prompt += `Format your response in an academic style with formal language, clear structure, and objective analysis. Include an introduction, body paragraphs, and conclusion. `;
 	} else if (format === 'professional') {
@@ -111,49 +111,28 @@ function getSystemPrompt(options) {
 	const feedbackRequested = Object.values(feedback).some(value => value === true);
 
 	if (feedbackRequested) {
-		prompt += `\n\nAfter providing the summary, please include an "ADDITIONAL ANALYSIS" section with the following components:\n`;
+		prompt += `\n\nAfter providing the summary, include an "ADDITIONAL ANALYSIS" section using only the following plain-text headers and format:\n\n`;
 
 		if (feedback.enableToneBiasAnalysis) {
-			prompt += `\n<h3>Tone and Bias Analysis</h3>\n<div class="analysis-section">Analyze the tone of the content (formal, casual, persuasive, informative, etc.) and identify any potential biases or slants in the presentation. Consider word choice, framing, and what information is emphasized or omitted. Format this as 2-3 paragraphs.</div>\n`;
+			prompt += `### Tone and Bias Analysis\nProvide 1–2 paragraphs analyzing the tone (e.g. neutral, persuasive) and any evident bias.\n\n`;
 		}
-
 		if (feedback.enableHighlightVagueClaims) {
-			prompt += `\n<h3>Unsubstantiated or Vague Claims</h3>\n<div class="analysis-section vague-claims-section">
-			<p>I've identified the following vague or unsubstantiated claims in the content:</p>
-			<div class="claims-list">
-			`;
-
-			// Enhanced vague claims detection instructions
-			prompt += `For each vague claim you identify:
-			1. <div class="claim-item">
-			   <div class="claim-text"><span class="vague-claim">Quote the exact claim text</span></div>
-			   <div class="claim-type">Specify the type of issue (Unverifiable, Overgeneralization, Ambiguous language, Missing context, etc.)</div>
-			   <div class="claim-confidence">Indicate confidence level (High, Medium, Low)</div>
-			   <div class="claim-explanation">Explain briefly why this claim is problematic</div>
-			   <div class="claim-improvement">Suggest how the claim could be improved</div>
-			   </div>
-
-			Aim to identify 3-5 of the most significant vague or unsubstantiated claims in the content.
-			Format each claim as a separate div with the class "claim-item".
-			If there are no significant vague claims, clearly state this fact.
-			</div></div>\n`;
+			prompt += `### Unsubstantiated or Vague Claims\nIdentify up to 3 vague or unsubstantiated claims. For each, provide:\n1. The quote\n2. Type of issue\n3. Confidence level\n4. Explanation\n5. Suggested improvement\n\n`;
 		}
-
 		if (feedback.enableCounterpoints) {
-			prompt += `\n<h3>Alternative Perspectives</h3>\n<div class="analysis-section">Present reasonable counterpoints or alternative viewpoints that might not be adequately addressed in the content. Format this as 3-4 bullet points.</div>\n`;
+			prompt += `### Counterpoints\nList 2–3 alternate viewpoints not considered in the original content.\n\n`;
 		}
-
 		if (feedback.enableSentimentDetection) {
-			prompt += `\n<h3>Entity Sentiment Analysis</h3>\n<div class="analysis-section">Identify key entities (people, organizations, concepts) mentioned in the content and analyze the sentiment expressed toward each. Format as a brief list with <span class="entity-positive">positive</span>, <span class="entity-neutral">neutral</span>, or <span class="entity-negative">negative</span> indicators for each entity.</div>\n`;
+			prompt += `### Sentiment Detection\nList any people or entities mentioned and the sentiment expressed toward them.\n\n`;
 		}
-
 		if (feedback.enableIntentSummary) {
-			prompt += `\n<h3>Content Intent Analysis</h3>\n<div class="analysis-section">Briefly analyze the likely intent or purpose of the content (to inform, persuade, entertain, sell, etc.) and the underlying message. One paragraph maximum.</div>\n`;
+			prompt += `### Intent Summary\nBriefly summarize the likely intent of the page (e.g. to inform, persuade).\n\n`;
+		}
+		if (feedback.enableFactContrast) {
+			prompt += `### Fact Contrast\nHighlight claims that may contradict known facts or require additional verification.\n\n`;
 		}
 
-		if (feedback.enableFactContrast) {
-			prompt += `\n<h3>Fact Checking Notes</h3>\n<div class="analysis-section">Identify statements that could benefit from fact-checking or additional context, and note any commonly accepted facts that might contradict claims in the content. Format as bullet points.</div>\n`;
-		}
+		prompt += `Use only these headers exactly as shown, no markdown, no HTML, and no combining sections. Output must remain strictly separated.\n`;
 	}
 
 	// Feedback options
@@ -178,9 +157,14 @@ function getSystemPrompt(options) {
 		}
 	}
 
-	prompt += `Do not use any markdown, only HTML formatting if required. `;
-	prompt += `<b> for bold text, <i> for italic text, <u> for underlined text, <p> for paragraphs, <br> for line breaks, <h3> for section headings. `;
-	prompt += `Avoid using any other HTML tags, this is a partial HTML document.`;
+	prompt += `Wrap each analysis section (Tone and Bias, Vague Claims, etc.) in plain text using the following format only:\n\n`;
+	prompt += `### Tone and Bias Analysis\n[Content here]\n\n`;
+	prompt += `### Unsubstantiated or Vague Claims\n[Content here]\n\n`;
+	prompt += `### Counterpoints\n[Content here]\n\n`;
+	prompt += `### Sentiment Detection\n[Content here]\n\n`;
+	prompt += `### Intent Summary\n[Content here]\n\n`;
+	prompt += `### Fact Contrast\n[Content here]\n\n`;
+	prompt += `Do NOT include any other HTML, markdown, or formatting. Use only these plain-text headers for section separation.`;
 
 	return prompt;
 }

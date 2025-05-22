@@ -205,6 +205,11 @@ select {
 	white-space: pre-wrap;
 }
 
+#summary-text ol {
+	padding-left: 1rem;
+	margin-left: 0;
+}
+
 #loading-indicator {
 	display: flex;
 	flex-direction: column;
