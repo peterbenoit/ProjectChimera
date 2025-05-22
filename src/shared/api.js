@@ -157,14 +157,28 @@ function getSystemPrompt(options) {
 		}
 	}
 
-	prompt += `Wrap each analysis section (Tone and Bias, Vague Claims, etc.) in plain text using the following format only:\n\n`;
-	prompt += `### Tone and Bias Analysis\n[Content here]\n\n`;
-	prompt += `### Unsubstantiated or Vague Claims\n[Content here]\n\n`;
-	prompt += `### Counterpoints\n[Content here]\n\n`;
-	prompt += `### Sentiment Detection\n[Content here]\n\n`;
-	prompt += `### Intent Summary\n[Content here]\n\n`;
-	prompt += `### Fact Contrast\n[Content here]\n\n`;
-	prompt += `Do NOT include any other HTML, markdown, or formatting. Use only these plain-text headers for section separation.`;
+	prompt += `Wrap each analysis section in plain text using this format. Only include sections requested in the feedback options:\n\n`;
+
+	if (feedback.enableToneBiasAnalysis) {
+		prompt += `### Tone and Bias Analysis\n(Include 1–2 paragraphs of tone and bias evaluation)\n\n`;
+	}
+	if (feedback.enableHighlightVagueClaims) {
+		prompt += `### Unsubstantiated or Vague Claims\n(Identify up to 3 vague claims. Include quote, type, confidence, explanation, improvement for each.)\n\n`;
+	}
+	if (feedback.enableCounterpoints) {
+		prompt += `### Counterpoints\n(If applicable, list 2–3 alternative perspectives. If no counterpoints exist, omit this section entirely.)\n\n`;
+	}
+	if (feedback.enableSentimentDetection) {
+		prompt += `### Sentiment Detection\n(List mentioned entities and note sentiment expressed toward each. If no sentiment is expressed, omit this section.)\n\n`;
+	}
+	if (feedback.enableIntentSummary) {
+		prompt += `### Intent Summary\n(1–2 sentences summarizing the content's intent. If unclear, omit.)\n\n`;
+	}
+	if (feedback.enableFactContrast) {
+		prompt += `### Fact Contrast\n(List claims that could conflict with common knowledge or known facts. If none found, omit section.)\n\n`;
+	}
+
+	prompt += `Use only these headers exactly as shown. Do not include headers for sections not selected. Do not include placeholder text or brackets like [Content here]. Do not include HTML or markdown formatting beyond the headers.`;
 
 	return prompt;
 }

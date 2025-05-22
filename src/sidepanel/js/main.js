@@ -440,13 +440,33 @@ function hideError() {
 }
 
 /**
- * Display a summary in the UI
+ * Display a summary in the UI, filtering out empty or placeholder analysis sections.
  * @param {string} summary - The summary text to display
  */
 function displaySummary(summary) {
-	summaryText.innerHTML = convertMarkdownToHtml(summary.trim());
+	const html = convertMarkdownToHtml(summary.trim());
 
-	// Hide analysis sections
+	// Create a temporary container to safely filter unwanted content
+	const tempContainer = document.createElement('div');
+	tempContainer.innerHTML = html;
+
+	// Remove empty or placeholder sections
+	const headings = tempContainer.querySelectorAll('h3');
+	headings.forEach(heading => {
+		const next = heading.nextElementSibling;
+		if (
+			next &&
+			next.tagName === 'P' &&
+			/\[\s*(no|none|content here)\s*[^\]]*\]/i.test(next.textContent.trim())
+		) {
+			heading.remove();
+			next.remove();
+		}
+	});
+
+	summaryText.innerHTML = tempContainer.innerHTML;
+
+	// Hide analysis section containers
 	toneBiasDiv.classList.add('hidden');
 	highlightVagueClaimsDiv.classList.add('hidden');
 	counterpointsDiv.classList.add('hidden');
