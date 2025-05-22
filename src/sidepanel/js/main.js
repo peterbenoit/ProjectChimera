@@ -837,9 +837,9 @@ function createHistoryItemElement(item, index) {
 		'<span class="history-item-date">' + formattedDate + '</span>' +
 		'<span class="history-item-format">' + formatName + ', ' + lengthName + '</span>' +
 		'</div>' +
-		'<div class="history-item-url" title="' + item.metadata.url + '">' +
+		'<a href="' + item.metadata.url + '" class="history-item-url" title="' + item.metadata.url + '">' +
 		item.metadata.url +
-		'</div>' +
+		'</a>' +
 		'<div class="history-item-content hidden">' +
 		formattedContent +
 		'</div>';
