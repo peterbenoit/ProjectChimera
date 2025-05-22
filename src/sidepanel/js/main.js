@@ -979,4 +979,12 @@ function showCustomConfirmation(message, onConfirm, onCancel = () => { }) {
 document.addEventListener('DOMContentLoaded', () => {
 	initialize();
 	updateFooterInfo();
+	// Intercept clicks on .history-item-url links and open them in a new tab using chrome.tabs.create
+	document.addEventListener('click', event => {
+		const anchor = event.target.closest('a.history-item-url');
+		if (anchor && anchor.href) {
+			event.preventDefault();
+			chrome.tabs.create({ url: anchor.href });
+		}
+	});
 });
