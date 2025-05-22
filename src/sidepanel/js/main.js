@@ -149,6 +149,23 @@ async function handleSummarizeClick() {
 
 		const pageData = await requestPageContent();
 
+		// Normalize the page URL (strip query and hash)
+		const pageUrl = new URL(pageData.metadata.url);
+		const normalizedUrl = pageUrl.origin + pageUrl.pathname;
+
+		// Check for existing summary for this page in history (normalized URL)
+		const history = await getSummaryHistory();
+		const existingMatch = history.find(item =>
+			(new URL(item.metadata.url).origin + new URL(item.metadata.url).pathname) === normalizedUrl
+		);
+		if (existingMatch) {
+			const confirm = window.confirm('A summary already exists for this page. Do you want to generate a new one anyway?');
+			if (!confirm) {
+				showLoading(false);
+				return;
+			}
+		}
+
 		const feedbackSettings = {
 			enableToneBiasAnalysis: settings.enableToneBiasAnalysis || false,
 			enableHighlightVagueClaims: settings.enableHighlightVagueClaims || false,
@@ -170,9 +187,9 @@ async function handleSummarizeClick() {
 
 		saveFormatAndLengthPreferences(format, length);
 
-		const history = await getSummaryHistory();
+		// Use the already-fetched history to check for duplicates before saving (normalized URL)
 		const isDuplicate = history.some(item =>
-			item.metadata.url === pageData.metadata.url &&
+			(new URL(item.metadata.url).origin + new URL(item.metadata.url).pathname) === normalizedUrl &&
 			item.content === summary &&
 			Math.abs(new Date(item.timestamp) - new Date()) < 60000
 		);
