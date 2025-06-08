@@ -1,6 +1,6 @@
 {
   "name": "project-chimera",
-  "version": "1.0.0.56",
+  "version": "1.0.0.58",
   "description": "AI-powered page summarizer Chrome extension",
   "main": "index.js",
   "scripts": {
