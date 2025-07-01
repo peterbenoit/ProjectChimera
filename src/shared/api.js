@@ -96,6 +96,9 @@ function getSystemPrompt(options) {
 
 	prompt += `Do not include any personal opinions or subjective statements. Focus solely on the content provided. `;
 
+	// Add content type detection and specialized formatting
+	prompt += `First, analyze the content to determine if it's a specific type of content (food blog, recipe, cooking article, etc.). `;
+
 	// Format-specific instructions
 	if (format === 'bullets') {
 		prompt += `Format your response as a bulleted list of key points, with a very brief introduction. Use - as bullet points. Be direct and clear. `;
@@ -106,6 +109,9 @@ function getSystemPrompt(options) {
 	} else if (format === 'simplified') {
 		prompt += `Format your response in simple, easy-to-understand language. Avoid complex terminology, use shorter sentences, and explain concepts clearly as if to someone with limited background knowledge. `;
 	}
+
+	// Add specialized content type instructions
+	prompt += getContentTypeInstructions();
 
 	// AI Feedback & Impressions options
 	const feedbackRequested = Object.values(feedback).some(value => value === true);
@@ -181,4 +187,54 @@ function getSystemPrompt(options) {
 	prompt += `Use only these headers exactly as shown. Do not include headers for sections not selected. Do not include placeholder text or brackets like [Content here]. Do not include HTML or markdown formatting beyond the headers.`;
 
 	return prompt;
+}
+
+/**
+ * Generate content-type specific instructions
+ *
+ * @returns {string} - Content type specific instructions
+ */
+function getContentTypeInstructions() {
+	return `
+
+CONTENT TYPE DETECTION AND SPECIALIZED FORMATTING:
+
+If the content appears to be a FOOD BLOG, RECIPE, or COOKING-related article (contains ingredients, cooking methods, food preparation, etc.), then:
+1. After your main summary, include a "RECIPE DETAILS" section with:
+   - ### Ingredients List
+     List all ingredients mentioned with quantities if available
+   - ### Cooking Instructions
+     Provide step-by-step cooking/baking instructions in numbered format
+   - ### Additional Notes
+     Include cooking tips, variations, or storage information if mentioned
+
+For food content, prioritize extracting:
+- Complete ingredient lists with measurements
+- Clear step-by-step cooking instructions
+- Cooking times and temperatures
+- Serving sizes and prep time
+- Any special techniques or tips mentioned
+
+If the content appears to be a HOME IMPROVEMENT, DIY, or CONSTRUCTION-related article (contains building, decorating, repairs, plumbing, electrical, carpentry, etc.), then:
+1. After your main summary, include a "PROJECT DETAILS" section with:
+   - ### Materials and Tools Needed
+     List all materials, tools, and supplies mentioned with quantities/specifications if available
+   - ### Step-by-Step Instructions
+     Provide detailed project instructions in numbered format
+   - ### Safety Considerations
+     Include any safety warnings, precautions, or protective equipment mentioned
+   - ### Additional Tips
+     Include expert tips, common mistakes to avoid, or variations if mentioned
+
+For home improvement content, prioritize extracting:
+- Complete materials and tools lists with specifications
+- Clear step-by-step project instructions
+- Time estimates and difficulty levels
+- Safety warnings and precautions
+- Cost estimates if mentioned
+- Special techniques or professional tips
+
+If the content is NOT food-related or home improvement-related, proceed with the standard summary format without specialized sections.
+
+`;
 }
