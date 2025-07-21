@@ -22,7 +22,7 @@
  */
 export async function generateSummary(content, options, apiKey) {
 	try {
-		console.log('API Client: Generating summary with options:', options);
+		// console.log('API Client: Generating summary with options:', options);
 
 		if (!apiKey) {
 			throw new Error('API key is required');

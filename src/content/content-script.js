@@ -5,7 +5,6 @@
  * handling communication with the service worker.
  */
 
-console.log('Content script loaded');
 
 /**
  * Extracts the main content from the current webpage
@@ -57,7 +56,7 @@ function summarizeFullPage() {
 
 // Listen for messages from the service worker
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	console.log("Content script received message:", message);
+	// console.log("Content script received message:", message);
 
 	if (message.action === 'extractPageContent') {
 		// Simple content extraction for now
@@ -78,6 +77,3 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	// Return true to indicate we'll send a response asynchronously
 	return true;
 });
-
-// This will be expanded with more sophisticated content extraction in the future
-console.log("Project Chimera content script loaded");

@@ -35,8 +35,8 @@ let isInitialized = false;
  * Initialize the sidepanel UI
  */
 function initialize() {
-	console.log('Initialize called from:', new Error().stack);
-	console.log('Project Chimera sidepanel initialized');
+	// console.log('Initialize called from:', new Error().stack);
+	// console.log('Project Chimera sidepanel initialized');
 
 	setupTabNavigation();
 
@@ -181,7 +181,7 @@ async function handleSummarizeClick() {
 			settings.apiKey
 		);
 
-		console.log('Generated summary:', summary);
+		// console.log('Generated summary:', summary);
 
 		displaySummary(summary);
 
@@ -420,7 +420,7 @@ function saveFormatAndLengthPreferences(format, length) {
  */
 function checkForPendingMessages() {
 	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-		console.log('SidePanel received message:', message);
+		// console.log('SidePanel received message:', message);
 
 		if (message.action === 'summarizeSelection' && message.text) {
 			showLoading(true);
@@ -736,7 +736,7 @@ function updateFooterInfo() {
 				buildNumber = process.env.BUILD_NUMBER;
 			}
 		} catch (e) {
-			console.log('Build number not available:', e);
+			// console.log('Build number not available:', e);
 		}
 		footerElement.textContent = `Project Chimera v1.0.1.${buildNumber}`;
 	}
@@ -751,7 +751,7 @@ function checkApiKeyAndRedirect() {
 		const apiKey = settings.apiKey;
 
 		if (!apiKey || apiKey.trim() === '') {
-			console.log('No API key found, redirecting to settings tab');
+			// console.log('No API key found, redirecting to settings tab');
 			switchToTab('settings');
 		}
 	});
