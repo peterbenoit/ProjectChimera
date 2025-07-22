@@ -7,27 +7,39 @@ import { getWordDefinition } from '../shared/api.js';
 
 let tooltip = null;
 let timeoutId = null;
+let isShowingTooltip = false;
 
 /**
  * Initialize word definition functionality for sidepanel
  */
 export function initSidepanelWordDefinition() {
 	document.addEventListener('mouseup', handleTextSelection);
-	// Don't hide on mousedown - this was causing the instant disappear
 	document.addEventListener('scroll', hideTooltip);
 	document.addEventListener('resize', hideTooltip);
+
+	// Prevent text selection from interfering
+	document.addEventListener('selectstart', (e) => {
+		if (isShowingTooltip && tooltip) {
+			e.preventDefault();
+		}
+	});
 }
 
 /**
  * Handle text selection events
  */
 async function handleTextSelection(event) {
+	// Don't process if we're clicking on the tooltip
+	if (tooltip && tooltip.contains(event.target)) {
+		return;
+	}
+
 	const selection = window.getSelection();
 	const selectedText = selection.toString().trim();
 
 	// Only process single word selections
 	if (!selectedText || selectedText.includes(' ') || selectedText.length < 2) {
-		hideTooltip();
+		if (!isShowingTooltip) hideTooltip();
 		return;
 	}
 
@@ -39,20 +51,29 @@ async function handleTextSelection(event) {
 	}
 
 	// Check if the selection is within the summary-text element
-	const range = selection.getRangeAt(0);
-	if (!summaryText.contains(range.commonAncestorContainer)) {
+	try {
+		const range = selection.getRangeAt(0);
+		if (!summaryText.contains(range.commonAncestorContainer)) {
+			hideTooltip();
+			return;
+		}
+	} catch (e) {
 		hideTooltip();
 		return;
 	}
 
 	// Check if selection is a single word (no spaces, reasonable length)
 	if (selectedText.split(/\s+/).length === 1 && selectedText.length <= 30) {
-		// Add small delay to prevent immediate hiding
-		setTimeout(async () => {
-			await showWordDefinition(selectedText, event.clientX, event.clientY);
-		}, 50);
+		// Clear any existing timeout
+		if (timeoutId) {
+			clearTimeout(timeoutId);
+			timeoutId = null;
+		}
+
+		// Show definition immediately
+		await showWordDefinition(selectedText, event.clientX, event.clientY);
 	} else {
-		hideTooltip();
+		if (!isShowingTooltip) hideTooltip();
 	}
 }
 
@@ -61,21 +82,22 @@ async function handleTextSelection(event) {
  */
 async function showWordDefinition(word, x, y) {
 	try {
+		isShowingTooltip = true;
 		hideTooltip(); // Hide any existing tooltip
 
 		// Show loading tooltip
 		showLoadingTooltip(x, y);
 
 		const definition = await getWordDefinition(word);
-		hideTooltip(); // Hide loading tooltip
 
-		if (definition && definition.meanings && definition.meanings.length > 0) {
-			showDefinitionTooltip(word, definition, x, y);
-		}
+		// Hide loading and show definition
+		hideTooltip();
+		showDefinitionTooltip(word, definition, x, y);
 
 	} catch (error) {
+		// Silently hide tooltip for words not found
+		isShowingTooltip = false;
 		hideTooltip();
-		console.log('Definition not found for:', word);
 	}
 }
 
@@ -98,6 +120,12 @@ function showLoadingTooltip(x, y) {
  * Show definition tooltip
  */
 function showDefinitionTooltip(word, definition, x, y) {
+	if (!definition || !definition.meanings || definition.meanings.length === 0) {
+		isShowingTooltip = false;
+		hideTooltip();
+		return;
+	}
+
 	tooltip = createTooltipElement();
 
 	const firstMeaning = definition.meanings[0];
@@ -120,8 +148,11 @@ function showDefinitionTooltip(word, definition, x, y) {
 	document.body.appendChild(tooltip);
 	positionTooltip(tooltip, x, y);
 
-	// Auto-hide after 15 seconds (longer time)
-	timeoutId = setTimeout(hideTooltip, 15000);
+	// Auto-hide after 15 seconds
+	timeoutId = setTimeout(() => {
+		isShowingTooltip = false;
+		hideTooltip();
+	}, 15000);
 }
 
 /**
@@ -152,12 +183,10 @@ function createTooltipElement() {
 	`;
 
 	// Add click-to-dismiss functionality
-	tooltip.addEventListener('click', hideTooltip);
-
-	// Add click outside to dismiss
-	setTimeout(() => {
-		document.addEventListener('click', handleClickOutside);
-	}, 100);
+	tooltip.addEventListener('click', () => {
+		isShowingTooltip = false;
+		hideTooltip();
+	});
 
 	// Trigger animation
 	setTimeout(() => {
@@ -166,16 +195,6 @@ function createTooltipElement() {
 	}, 10);
 
 	return tooltip;
-}
-
-/**
- * Handle clicks outside tooltip to dismiss
- */
-function handleClickOutside(event) {
-	if (tooltip && !tooltip.contains(event.target)) {
-		hideTooltip();
-		document.removeEventListener('click', handleClickOutside);
-	}
 }
 
 /**
@@ -224,9 +243,6 @@ function hideTooltip() {
 			}
 			tooltip = null;
 		}, 250);
-
-		// Remove the click outside listener
-		document.removeEventListener('click', handleClickOutside);
 	}
 
 	if (timeoutId) {

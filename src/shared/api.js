@@ -248,7 +248,12 @@ If the content is NOT food-related or home improvement-related, proceed with the
 export async function getWordDefinition(word) {
 	try {
 		// Clean the word - remove punctuation and convert to lowercase
-		const cleanWord = word.trim().toLowerCase().replace(/[^\w]/g, '');
+		let cleanWord = word.trim().toLowerCase().replace(/[^\w]/g, '');
+
+		// Handle possessive forms (remove 's)
+		if (cleanWord.endsWith('s') && word.includes("'")) {
+			cleanWord = cleanWord.slice(0, -1);
+		}
 
 		if (!cleanWord || cleanWord.length < 2) {
 			throw new Error('Invalid word');
@@ -257,14 +262,23 @@ export async function getWordDefinition(word) {
 		const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${cleanWord}`);
 
 		if (!response.ok) {
-			throw new Error('Word not found');
+			// Try without 's' if it's a plural or possessive
+			if (cleanWord.endsWith('s') && cleanWord.length > 3) {
+				const singularWord = cleanWord.slice(0, -1);
+				const singularResponse = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${singularWord}`);
+				if (singularResponse.ok) {
+					const singularData = await singularResponse.json();
+					return singularData[0];
+				}
+			}
+			throw new Error('Word not found in dictionary');
 		}
 
 		const data = await response.json();
 		return data[0]; // Return first result
 
 	} catch (error) {
-		console.error('Error fetching word definition:', error);
+		// Don't log errors to console for unknown words - it's expected
 		throw error;
 	}
 }
