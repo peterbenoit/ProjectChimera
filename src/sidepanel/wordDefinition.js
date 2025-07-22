@@ -12,51 +12,38 @@ let isShowingTooltip = false;
  * Initialize word definition functionality for sidepanel
  */
 export function initSidepanelWordDefinition() {
-	document.addEventListener('mouseup', handleTextSelection);
+	const summaryTextEl = document.querySelector('#summary-text');
+	if (summaryTextEl) {
+		summaryTextEl.addEventListener('mouseup', handleTextSelection);
+	}
+
+	// Global listeners to hide the tooltip
+	document.addEventListener('mousedown', handleGlobalClick, true);
 	document.addEventListener('scroll', hideTooltip, true);
 	document.addEventListener('resize', hideTooltip, true);
-
-	// Prevent text selection from interfering
-	document.addEventListener('selectstart', (e) => {
-		if (isShowingTooltip && tooltip) {
-			e.preventDefault();
-		}
-	});
 }
 
 /**
- * Handle text selection events
+ * Hide tooltip if a click occurs outside of it.
+ */
+function handleGlobalClick(event) {
+	if (tooltip && !tooltip.contains(event.target)) {
+		hideTooltip();
+	}
+}
+
+/**
+ * Handle text selection events within the #summary-text element.
  */
 async function handleTextSelection(event) {
-	// Don't process if we're clicking on the tooltip itself or the close button
-	if (tooltip && (tooltip.contains(event.target) || event.target.classList.contains('chimera-tooltip-close'))) {
-		return;
-	}
+	// We don't want clicks inside the tooltip to bubble up and close it.
+	event.stopPropagation();
 
 	const selection = window.getSelection();
 	const selectedText = selection.toString().trim();
 
 	// Only process single word selections
 	if (!selectedText || selectedText.includes(' ') || selectedText.length < 2) {
-		hideTooltip();
-		return;
-	}
-
-	// Only work within the summary-text element
-	const summaryTextEl = document.querySelector('#summary-text');
-	if (!summaryTextEl) {
-		hideTooltip();
-		return;
-	}
-
-	// Check if the selection is within the summary-text element
-	try {
-		const range = selection.getRangeAt(0);
-		if (!summaryTextEl.contains(range.commonAncestorContainer)) {
-			hideTooltip();
-			return;
-		}
-	} catch (e) {
 		hideTooltip();
 		return;
 	}
@@ -96,6 +83,7 @@ async function showWordDefinition(word, x, y) {
 		// Silently hide tooltip for words not found
 		isShowingTooltip = false;
 		hideTooltip();
+		console.error('Error fetching definition:', error);
 	}
 }
 
@@ -143,10 +131,7 @@ function showDefinitionTooltip(word, definition, x, y) {
 
 	// Add event listener for the close button
 	const closeButton = tooltip.querySelector('.chimera-tooltip-close');
-	closeButton.addEventListener('click', () => {
-		isShowingTooltip = false;
-		hideTooltip();
-	});
+	closeButton.addEventListener('click', hideTooltip);
 }
 
 /**
@@ -314,11 +299,3 @@ style.textContent = `
 	}
 `;
 document.head.appendChild(style);
-
-// Add a listener to hide the tooltip when the mouse leaves the sidepanel
-document.addEventListener('mouseleave', (e) => {
-    // Check if the mouse is leaving the viewport, not just an element
-    if (e.relatedTarget === null) {
-	    hideTooltip();
-    }
-});

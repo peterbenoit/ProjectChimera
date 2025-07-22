@@ -1,10 +1,21 @@
 /**
  * Main JavaScript for Project Chimera SidePanel
  */
-import { marked } from 'marked';
-import { generateSummary } from '../../shared/api.js';
-import { saveSummaryToHistory, getSummaryHistory, deleteSummaryFromHistory, clearSummaryHistory } from '../../shared/storage.js';
-import { initSidepanelWordDefinition } from '../wordDefinition.js';
+import {
+	marked
+} from 'marked';
+import {
+	generateSummary
+} from '../../shared/api.js';
+import {
+	saveSummaryToHistory,
+	getSummaryHistory,
+	deleteSummaryFromHistory,
+	clearSummaryHistory
+} from '../../shared/storage.js';
+import {
+	initSidepanelWordDefinition
+} from '../wordDefinition.js';
 
 const tabButtons = document.querySelectorAll('.tab-button');
 const tabPanels = document.querySelectorAll('.tab-panel');
@@ -30,29 +41,37 @@ const intentSummaryDiv = document.getElementById('intent-summary');
 const factContrastDiv = document.getElementById('fact-contrast');
 const additionalAnalysisContainer = document.getElementById('additional-analysis');
 
-let isInitialized = false;
+let isSpeaking = false;
+
+// SVG Icons
+const ICONS = {
+	copy: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
+	check: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+	volumeOn: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
+	volumeOff: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`
+};
+
 
 /**
  * Initialize the sidepanel UI
  */
 function initialize() {
-	// console.log('Initialize called from:', new Error().stack);
-	// console.log('Project Chimera sidepanel initialized');
-
 	setupTabNavigation();
-
 	setupEventListeners();
-
 	loadUserPreferences();
-
 	checkForPendingMessages();
-
 	checkApiKeyAndRedirect();
-
 	loadHistoryData();
-
-	// Initialize word definition functionality
 	initSidepanelWordDefinition();
+	injectIcons();
+}
+
+/**
+ * Inject SVG icons into buttons
+ */
+function injectIcons() {
+	if (copyBtn) copyBtn.innerHTML = ICONS.copy;
+	if (speakBtn) speakBtn.innerHTML = ICONS.volumeOn;
 }
 
 /**
@@ -106,7 +125,7 @@ function setupEventListeners() {
 
 	const retryBtn = document.getElementById('retry-btn');
 	if (retryBtn) {
-		retryBtn.addEventListener('click', handleSummarizeClick);
+	etryBtn.addEventListener('click', handleSummarizeClick);
 	}
 
 	const settingsBtn = document.getElementById('settings-btn');
@@ -180,12 +199,13 @@ async function handleSummarizeClick() {
 		};
 
 		const summary = await generateSummary(
-			pageData.content,
-			{ format, length, feedback: feedbackSettings },
+			pageData.content, {
+				format,
+				length,
+				feedback: feedbackSettings
+			},
 			settings.apiKey
 		);
-
-		// console.log('Generated summary:', summary);
 
 		displaySummary(summary);
 
@@ -202,7 +222,10 @@ async function handleSummarizeClick() {
 			await saveSummaryToHistory({
 				content: summary,
 				metadata: pageData.metadata,
-				options: { format, length },
+				options: {
+					format,
+					length
+				},
 				timestamp: new Date().toISOString()
 			});
 		}
@@ -231,7 +254,10 @@ function getSettings() {
  */
 function requestPageContent() {
 	return new Promise((resolve, reject) => {
-		chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+		chrome.tabs.query({
+			active: true,
+			currentWindow: true
+		}, tabs => {
 			if (!tabs[0]) {
 				reject(new Error('No active tab found'));
 				return;
@@ -244,8 +270,9 @@ function requestPageContent() {
 			}
 
 			chrome.tabs.sendMessage(
-				tabs[0].id,
-				{ action: 'extractPageContent' },
+				tabs[0].id, {
+					action: 'extractPageContent'
+				},
 				response => {
 					if (chrome.runtime.lastError) {
 						console.error("Content script error:", chrome.runtime.lastError);
@@ -268,10 +295,9 @@ function handleCopyClick() {
 	if (summaryText.innerHTML) {
 		navigator.clipboard.writeText(summaryText.textContent)
 			.then(() => {
-				const originalText = copyBtn.innerHTML;
-				copyBtn.innerHTML = '<span class="icon">✓</span>';
+				copyBtn.innerHTML = ICONS.check;
 				setTimeout(() => {
-					copyBtn.innerHTML = originalText;
+					copyBtn.innerHTML = ICONS.copy;
 				}, 1500);
 			})
 			.catch(err => {
@@ -284,17 +310,36 @@ function handleCopyClick() {
  * Handle speak button click
  */
 function handleSpeakClick() {
+	if (isSpeaking) {
+		chrome.tts.stop();
+		// The 'interrupted' event will handle state change
+		return;
+	}
+
 	if (summaryText.textContent) {
 		chrome.tts.speak(summaryText.textContent, {
 			rate: 1.0,
-			onEvent: function (event) {
-				if (event.type === 'error') {
-					console.error('TTS Error:', event);
+			onEvent: function(event) {
+				switch (event.type) {
+					case 'start':
+						isSpeaking = true;
+						speakBtn.innerHTML = ICONS.volumeOff;
+						break;
+					case 'end':
+					case 'interrupted':
+					case 'error':
+						isSpeaking = false;
+						speakBtn.innerHTML = ICONS.volumeOn;
+						if (event.type === 'error') {
+							console.error('TTS Error:', event.errorMessage);
+						}
+						break;
 				}
 			}
 		});
 	}
 }
+
 
 /**
  * Handle save settings button click
@@ -312,7 +357,9 @@ function handleSaveSettings() {
 		enableFactContrast: document.getElementById('enable-fact-contrast').checked
 	};
 
-	chrome.storage.local.set({ settings }, () => {
+	chrome.storage.local.set({
+		settings
+	}, () => {
 		const originalText = saveSettingsBtn.textContent;
 		saveSettingsBtn.textContent = 'Saved!';
 		setTimeout(() => {
@@ -478,7 +525,7 @@ function displaySummary(summary) {
 		if (
 			next &&
 			next.tagName === 'P' &&
-			/\[\s*(no|none|content here)\s*[^\]]*\]/i.test(next.textContent.trim())
+			/[\s*(no|none|content here)\s*[^\]]*]/i.test(next.textContent.trim())
 		) {
 			heading.remove();
 			next.remove();
@@ -552,7 +599,7 @@ function processVagueClaimsSection(section) {
 
 		// Get explanation and improvement text that follows this claim
 		const startPos = match.index + match[0].length;
-		const nextClaimMatch = section.substring(startPos).match(/\d+\.\s+"[^"]+"/);
+		const nextClaimMatch = section.substring(startPos).match(/\d+\.\s*"[^"]+"/);
 		const endPos = nextClaimMatch ? startPos + nextClaimMatch.index : section.length;
 		const followingText = section.substring(startPos, endPos);
 
@@ -934,7 +981,7 @@ function setupHistorySearch() {
 	const searchInput = document.getElementById('history-search');
 	if (!searchInput) return;
 
-	searchInput.addEventListener('input', () => {
+	ssearchInput.addEventListener('input', () => {
 		const query = searchInput.value.toLowerCase();
 		const historyItems = document.querySelectorAll('.history-item');
 
@@ -959,7 +1006,7 @@ function setupHistorySearch() {
  * @param {Function} onConfirm - Callback when user confirms
  * @param {Function} onCancel - Callback when user cancels
  */
-function showCustomConfirmation(message, onConfirm, onCancel = () => { }) {
+function showCustomConfirmation(message, onConfirm, onCancel = () => {}) {
 	const existingOverlay = document.querySelector('.confirmation-overlay');
 	if (existingOverlay) {
 		document.body.removeChild(existingOverlay);
@@ -1005,7 +1052,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		const anchor = event.target.closest('a.history-item-url');
 		if (anchor && anchor.href) {
 			event.preventDefault();
-			chrome.tabs.create({ url: anchor.href });
+			chrome.tabs.create({
+				url: anchor.href
+			});
 		}
 	});
 });
