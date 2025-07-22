@@ -6,7 +6,6 @@
 import { getWordDefinition } from '../shared/api.js';
 
 let tooltip = null;
-let timeoutId = null;
 let isShowingTooltip = false;
 
 /**
@@ -14,8 +13,8 @@ let isShowingTooltip = false;
  */
 export function initSidepanelWordDefinition() {
 	document.addEventListener('mouseup', handleTextSelection);
-	document.addEventListener('scroll', hideTooltip);
-	document.addEventListener('resize', hideTooltip);
+	document.addEventListener('scroll', hideTooltip, true);
+	document.addEventListener('resize', hideTooltip, true);
 
 	// Prevent text selection from interfering
 	document.addEventListener('selectstart', (e) => {
@@ -29,8 +28,8 @@ export function initSidepanelWordDefinition() {
  * Handle text selection events
  */
 async function handleTextSelection(event) {
-	// Don't process if we're clicking on the tooltip
-	if (tooltip && tooltip.contains(event.target)) {
+	// Don't process if we're clicking on the tooltip itself or the close button
+	if (tooltip && (tooltip.contains(event.target) || event.target.classList.contains('chimera-tooltip-close'))) {
 		return;
 	}
 
@@ -39,13 +38,13 @@ async function handleTextSelection(event) {
 
 	// Only process single word selections
 	if (!selectedText || selectedText.includes(' ') || selectedText.length < 2) {
-		if (!isShowingTooltip) hideTooltip();
+		hideTooltip();
 		return;
 	}
 
 	// Only work within the summary-text element
-	const summaryText = document.querySelector('#summary-text');
-	if (!summaryText) {
+	const summaryTextEl = document.querySelector('#summary-text');
+	if (!summaryTextEl) {
 		hideTooltip();
 		return;
 	}
@@ -53,7 +52,7 @@ async function handleTextSelection(event) {
 	// Check if the selection is within the summary-text element
 	try {
 		const range = selection.getRangeAt(0);
-		if (!summaryText.contains(range.commonAncestorContainer)) {
+		if (!summaryTextEl.contains(range.commonAncestorContainer)) {
 			hideTooltip();
 			return;
 		}
@@ -62,18 +61,11 @@ async function handleTextSelection(event) {
 		return;
 	}
 
-	// Check if selection is a single word (no spaces, reasonable length)
+	// Check if selection is a single word
 	if (selectedText.split(/\s+/).length === 1 && selectedText.length <= 30) {
-		// Clear any existing timeout
-		if (timeoutId) {
-			clearTimeout(timeoutId);
-			timeoutId = null;
-		}
-
-		// Show definition immediately
 		await showWordDefinition(selectedText, event.clientX, event.clientY);
 	} else {
-		if (!isShowingTooltip) hideTooltip();
+		hideTooltip();
 	}
 }
 
@@ -81,18 +73,24 @@ async function handleTextSelection(event) {
  * Show word definition tooltip
  */
 async function showWordDefinition(word, x, y) {
-	try {
-		isShowingTooltip = true;
-		hideTooltip(); // Hide any existing tooltip
+	// Hide any existing tooltip to ensure only one is open
+	hideTooltip();
+	isShowingTooltip = true;
 
+	try {
 		// Show loading tooltip
 		showLoadingTooltip(x, y);
 
 		const definition = await getWordDefinition(word);
 
-		// Hide loading and show definition
+		// Hide loading tooltip before showing definition
 		hideTooltip();
-		showDefinitionTooltip(word, definition, x, y);
+
+		if (definition && definition.meanings && definition.meanings.length > 0) {
+			showDefinitionTooltip(word, definition, x, y);
+		} else {
+			isShowingTooltip = false;
+		}
 
 	} catch (error) {
 		// Silently hide tooltip for words not found
@@ -120,12 +118,6 @@ function showLoadingTooltip(x, y) {
  * Show definition tooltip
  */
 function showDefinitionTooltip(word, definition, x, y) {
-	if (!definition || !definition.meanings || definition.meanings.length === 0) {
-		isShowingTooltip = false;
-		hideTooltip();
-		return;
-	}
-
 	tooltip = createTooltipElement();
 
 	const firstMeaning = definition.meanings[0];
@@ -134,6 +126,7 @@ function showDefinitionTooltip(word, definition, x, y) {
 	const partOfSpeech = firstMeaning.partOfSpeech || '';
 
 	tooltip.innerHTML = `
+        <button class="chimera-tooltip-close">&times;</button>
 		<div class="chimera-tooltip-content">
 			<div class="chimera-tooltip-word">
 				<strong>${word}</strong>
@@ -148,22 +141,26 @@ function showDefinitionTooltip(word, definition, x, y) {
 	document.body.appendChild(tooltip);
 	positionTooltip(tooltip, x, y);
 
-	// Auto-hide after 15 seconds
-	timeoutId = setTimeout(() => {
+	// Add event listener for the close button
+	const closeButton = tooltip.querySelector('.chimera-tooltip-close');
+	closeButton.addEventListener('click', () => {
 		isShowingTooltip = false;
 		hideTooltip();
-	}, 15000);
+	});
 }
 
 /**
  * Create tooltip element with styles optimized for sidepanel
  */
 function createTooltipElement() {
-	const tooltip = document.createElement('div');
-	tooltip.className = 'chimera-word-tooltip';
-	tooltip.style.cssText = `
+	// Ensure no old tooltips are lingering
+	hideTooltip();
+
+	const newTooltip = document.createElement('div');
+	newTooltip.className = 'chimera-word-tooltip';
+	newTooltip.style.cssText = `
 		position: fixed;
-		z-index: 10000;
+		z-index: 10001; /* Ensure it's above other elements */
 		background: var(--bg-primary, #fff);
 		border: 1px solid var(--border-color, #ccc);
 		border-radius: 8px;
@@ -182,29 +179,24 @@ function createTooltipElement() {
 		backdrop-filter: blur(10px);
 	`;
 
-	// Add click-to-dismiss functionality
-	tooltip.addEventListener('click', () => {
-		isShowingTooltip = false;
-		hideTooltip();
-	});
-
 	// Trigger animation
 	setTimeout(() => {
-		tooltip.style.opacity = '1';
-		tooltip.style.transform = 'translateY(0) scale(1)';
+		newTooltip.style.opacity = '1';
+		newTooltip.style.transform = 'translateY(0) scale(1)';
 	}, 10);
 
-	return tooltip;
+	return newTooltip;
 }
 
 /**
  * Position tooltip within sidepanel bounds
  */
-function positionTooltip(tooltip, x, y) {
-	// Get sidepanel dimensions
+function positionTooltip(tooltipEl, x, y) {
 	const sidepanel = document.querySelector('.sidepanel, body');
+	if (!sidepanel) return;
+
 	const sidepanelRect = sidepanel.getBoundingClientRect();
-	const tooltipRect = tooltip.getBoundingClientRect();
+	const tooltipRect = tooltipEl.getBoundingClientRect();
 
 	let left = x + 15;
 	let top = y - tooltipRect.height - 15;
@@ -213,42 +205,37 @@ function positionTooltip(tooltip, x, y) {
 	if (left + tooltipRect.width > sidepanelRect.right - 20) {
 		left = x - tooltipRect.width - 15;
 	}
-
 	if (left < sidepanelRect.left + 20) {
 		left = sidepanelRect.left + 20;
 	}
-
 	if (top < sidepanelRect.top + 20) {
 		top = y + 25;
 	}
-
 	if (top + tooltipRect.height > sidepanelRect.bottom - 20) {
 		top = sidepanelRect.bottom - tooltipRect.height - 20;
 	}
 
-	tooltip.style.left = `${left}px`;
-	tooltip.style.top = `${top}px`;
+	tooltipEl.style.left = `${left}px`;
+	tooltipEl.style.top = `${top}px`;
 }
 
 /**
- * Hide tooltip with animation
+ * Hide and remove tooltip from the DOM
  */
 function hideTooltip() {
 	if (tooltip) {
-		tooltip.style.opacity = '0';
-		tooltip.style.transform = 'translateY(10px) scale(0.95)';
-		setTimeout(() => {
-			if (tooltip && tooltip.parentNode) {
-				tooltip.parentNode.removeChild(tooltip);
-			}
-			tooltip = null;
-		}, 250);
-	}
+		const currentTooltip = tooltip;
+		tooltip = null; // Clear reference immediately
 
-	if (timeoutId) {
-		clearTimeout(timeoutId);
-		timeoutId = null;
+		currentTooltip.style.opacity = '0';
+		currentTooltip.style.transform = 'translateY(10px) scale(0.95)';
+		setTimeout(() => {
+			if (currentTooltip.parentNode) {
+				currentTooltip.parentNode.removeChild(currentTooltip);
+			}
+		}, 250); // Match transition duration
 	}
+	isShowingTooltip = false;
 }
 
 // Add CSS for tooltip styling in sidepanel
@@ -256,14 +243,38 @@ const style = document.createElement('style');
 style.textContent = `
 	.chimera-word-tooltip {
 		user-select: none;
-		cursor: pointer;
 	}
+
+    .chimera-tooltip-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 24px;
+        height: 24px;
+        border: none;
+        background: transparent;
+        font-size: 20px;
+        line-height: 1;
+        color: var(--text-secondary, #666);
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .chimera-tooltip-close:hover {
+        color: var(--text-primary, #333);
+        background-color: var(--bg-secondary, #f0f0f0);
+    }
 
 	.chimera-word-tooltip .chimera-tooltip-word {
 		font-weight: 600;
 		margin-bottom: 6px;
 		font-size: 16px;
 		color: var(--text-primary, #333);
+        padding-right: 24px; /* Space for close button */
 	}
 
 	.chimera-word-tooltip .chimera-tooltip-phonetic {
@@ -301,10 +312,13 @@ style.textContent = `
 		text-align: center;
 		padding: 8px 0;
 	}
-
-	.chimera-word-tooltip:hover {
-		box-shadow: 0 12px 40px rgba(0,0,0,0.18);
-		transform: translateY(-2px) scale(1.02);
-	}
 `;
 document.head.appendChild(style);
+
+// Add a listener to hide the tooltip when the mouse leaves the sidepanel
+document.addEventListener('mouseleave', (e) => {
+    // Check if the mouse is leaving the viewport, not just an element
+    if (e.relatedTarget === null) {
+	    hideTooltip();
+    }
+});
