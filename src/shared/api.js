@@ -238,3 +238,33 @@ If the content is NOT food-related or home improvement-related, proceed with the
 
 `;
 }
+
+/**
+ * Get word definition using Free Dictionary API
+ *
+ * @param {string} word - The word to look up
+ * @returns {Promise<object>} - The word definition data
+ */
+export async function getWordDefinition(word) {
+	try {
+		// Clean the word - remove punctuation and convert to lowercase
+		const cleanWord = word.trim().toLowerCase().replace(/[^\w]/g, '');
+
+		if (!cleanWord || cleanWord.length < 2) {
+			throw new Error('Invalid word');
+		}
+
+		const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${cleanWord}`);
+
+		if (!response.ok) {
+			throw new Error('Word not found');
+		}
+
+		const data = await response.json();
+		return data[0]; // Return first result
+
+	} catch (error) {
+		console.error('Error fetching word definition:', error);
+		throw error;
+	}
+}

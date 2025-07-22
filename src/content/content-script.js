@@ -5,7 +5,6 @@
  * handling communication with the service worker.
  */
 
-
 /**
  * Extracts the main content from the current webpage
  * using a multi-stage approach based on semantic HTML elements.

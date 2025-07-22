@@ -4,6 +4,7 @@
 import { marked } from 'marked';
 import { generateSummary } from '../../shared/api.js';
 import { saveSummaryToHistory, getSummaryHistory, deleteSummaryFromHistory, clearSummaryHistory } from '../../shared/storage.js';
+import { initSidepanelWordDefinition } from '../wordDefinition.js';
 
 const tabButtons = document.querySelectorAll('.tab-button');
 const tabPanels = document.querySelectorAll('.tab-panel');
@@ -49,6 +50,9 @@ function initialize() {
 	checkApiKeyAndRedirect();
 
 	loadHistoryData();
+
+	// Initialize word definition functionality
+	initSidepanelWordDefinition();
 }
 
 /**
