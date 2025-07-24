@@ -48,7 +48,8 @@ const ICONS = {
 	copy: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
 	check: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
 	volumeOn: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
-	volumeOff: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`
+	volumeOff: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`,
+	delete: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`
 };
 
 
@@ -125,7 +126,7 @@ function setupEventListeners() {
 
 	const retryBtn = document.getElementById('retry-btn');
 	if (retryBtn) {
-	etryBtn.addEventListener('click', handleSummarizeClick);
+		retryBtn.addEventListener('click', handleSummarizeClick);
 	}
 
 	const settingsBtn = document.getElementById('settings-btn');
@@ -599,7 +600,7 @@ function processVagueClaimsSection(section) {
 
 		// Get explanation and improvement text that follows this claim
 		const startPos = match.index + match[0].length;
-		const nextClaimMatch = section.substring(startPos).match(/\d+\.\s*"[^"]+"/);
+		const nextClaimMatch = section.substring(startPos).match(/\d+\.\s+"[^"]+"/);
 		const endPos = nextClaimMatch ? startPos + nextClaimMatch.index : section.length;
 		const followingText = section.substring(startPos, endPos);
 
@@ -889,28 +890,21 @@ function createHistoryItemElement(item, index) {
 			.join('');
 	}
 
-	itemElement.innerHTML =
-		'<div class="history-item-header">' +
-		'<h3 class="history-item-title">' + (item.metadata.title || 'Untitled Page') + '</h3>' +
-		'<div class="history-item-actions">' +
-		'<button class="history-copy-btn" title="Copy Summary">' +
-		'<span class="icon">📋</span>' +
-		'</button>' +
-		'<button class="history-delete-btn" title="Delete Summary">' +
-		'<span class="icon">🗑️</span>' +
-		'</button>' +
-		'</div>' +
-		'</div>' +
-		'<div class="history-item-meta">' +
-		'<span class="history-item-date">' + formattedDate + '</span>' +
-		'<span class="history-item-format">' + formatName + ', ' + lengthName + '</span>' +
-		'</div>' +
-		'<a href="' + item.metadata.url + '" class="history-item-url" title="' + item.metadata.url + '">' +
-		item.metadata.url +
-		'</a>' +
-		'<div class="history-item-content hidden">' +
-		formattedContent +
-		'</div>';
+	itemElement.innerHTML = `
+		<div class="history-item-header">
+			<h3 class="history-item-title">${item.metadata.title || 'Untitled Page'}</h3>
+			<div class="history-item-actions">
+				<button class="history-copy-btn" title="Copy Summary">${ICONS.copy}</button>
+				<button class="history-delete-btn" title="Delete Summary">${ICONS.delete}</button>
+			</div>
+		</div>
+		<div class="history-item-meta">
+			<span class="history-item-date">${formattedDate}</span>
+			<span class="history-item-format">${formatName}, ${lengthName}</span>
+		</div>
+		<a href="${item.metadata.url}" class="history-item-url" title="${item.metadata.url}">${item.metadata.url}</a>
+		<div class="history-item-content hidden">${formattedContent}</div>
+	`;
 
 	const copyBtn = itemElement.querySelector('.history-copy-btn');
 	const deleteBtn = itemElement.querySelector('.history-delete-btn');
@@ -921,14 +915,14 @@ function createHistoryItemElement(item, index) {
 		contentDiv.classList.toggle('hidden');
 	});
 
-	copyBtn.addEventListener('click', () => {
+	copyBtn.addEventListener('click', (e) => {
+		e.stopPropagation();
 		const content = item.content;
 		navigator.clipboard.writeText(content)
 			.then(() => {
-				const originalText = copyBtn.innerHTML;
-				copyBtn.innerHTML = '<span class="icon">✓</span>';
+				copyBtn.innerHTML = ICONS.check;
 				setTimeout(() => {
-					copyBtn.innerHTML = originalText;
+					copyBtn.innerHTML = ICONS.copy;
 				}, 1500);
 			})
 			.catch(err => {
@@ -936,7 +930,8 @@ function createHistoryItemElement(item, index) {
 			});
 	});
 
-	deleteBtn.addEventListener('click', async () => {
+	deleteBtn.addEventListener('click', async (e) => {
+		e.stopPropagation();
 		showCustomConfirmation('Are you sure you want to delete this summary?', async () => {
 			await deleteSummaryFromHistory(index);
 			loadHistoryData();
@@ -981,7 +976,7 @@ function setupHistorySearch() {
 	const searchInput = document.getElementById('history-search');
 	if (!searchInput) return;
 
-	ssearchInput.addEventListener('input', () => {
+	searchInput.addEventListener('input', () => {
 		const query = searchInput.value.toLowerCase();
 		const historyItems = document.querySelectorAll('.history-item');
 

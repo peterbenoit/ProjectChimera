@@ -28,3 +28,4 @@ package-lock.json
 docs
 scripts
 backup
+.aider*
