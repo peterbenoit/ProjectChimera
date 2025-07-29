@@ -1,5 +1,5 @@
 /**
- * Storage Manager for Project Chimera
+ * Storage Manager for Smart Digest
  * Handles persistent storage operations
  */
 

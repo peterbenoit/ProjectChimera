@@ -1,5 +1,5 @@
 /**
- * Service Worker for Project Chimera
+ * Service Worker for Smart Digest
  * Handles SidePanel registration, context menu creation,
  * and message passing between components.
  */

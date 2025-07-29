@@ -1,14 +1,13 @@
 {
 	"name": "smartdigest",
-	"version": "1.0.0.82",
+	"version": "1.0.0.84",
 	"description": "AI-powered page summarizer Chrome extension",
 	"main": "index.js",
 	"scripts": {
 		"build": "webpack --config config/webpack.prod.js",
-		"dev": "webpack --config config/webpack.dev.js",
-		"test": "echo \"No tests specified\""
+		"dev": "webpack --config config/webpack.dev.js"
 	},
-	"author": "",
+	"author": "Peter Benoit",
 	"license": "MIT",
 	"devDependencies": {
 		"@babel/core": "^7.22.9",

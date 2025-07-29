@@ -1,5 +1,5 @@
 /**
- * Main JavaScript for Project Chimera SidePanel
+ * Main JavaScript for Smart Digest SidePanel
  */
 import {
 	marked
@@ -201,10 +201,10 @@ async function handleSummarizeClick() {
 
 		const summary = await generateSummary(
 			pageData.content, {
-				format,
-				length,
-				feedback: feedbackSettings
-			},
+			format,
+			length,
+			feedback: feedbackSettings
+		},
 			settings.apiKey
 		);
 
@@ -272,8 +272,8 @@ function requestPageContent() {
 
 			chrome.tabs.sendMessage(
 				tabs[0].id, {
-					action: 'extractPageContent'
-				},
+				action: 'extractPageContent'
+			},
 				response => {
 					if (chrome.runtime.lastError) {
 						console.error("Content script error:", chrome.runtime.lastError);
@@ -320,7 +320,7 @@ function handleSpeakClick() {
 	if (summaryText.textContent) {
 		chrome.tts.speak(summaryText.textContent, {
 			rate: 1.0,
-			onEvent: function(event) {
+			onEvent: function (event) {
 				switch (event.type) {
 					case 'start':
 						isSpeaking = true;
@@ -790,7 +790,7 @@ function updateFooterInfo() {
 		} catch (e) {
 			// console.log('Build number not available:', e);
 		}
-		footerElement.textContent = `Project Chimera v1.0.1.${buildNumber}`;
+		footerElement.textContent = `Smart Digest v1.0.1.${buildNumber}`;
 	}
 }
 
@@ -1001,7 +1001,7 @@ function setupHistorySearch() {
  * @param {Function} onConfirm - Callback when user confirms
  * @param {Function} onCancel - Callback when user cancels
  */
-function showCustomConfirmation(message, onConfirm, onCancel = () => {}) {
+function showCustomConfirmation(message, onConfirm, onCancel = () => { }) {
 	const existingOverlay = document.querySelector('.confirmation-overlay');
 	if (existingOverlay) {
 		document.body.removeChild(existingOverlay);

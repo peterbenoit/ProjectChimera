@@ -1,5 +1,5 @@
 /**
- * Content Script for Project Chimera
+ * Content Script for Smart Digest
  *
  * Responsible for extracting content from web pages and
  * handling communication with the service worker.

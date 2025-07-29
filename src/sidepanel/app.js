@@ -1,5 +1,5 @@
 /**
- * Side Panel Script for Project Chimera
+ * Side Panel Script for Smart Digest
  *
  * Responsible for the functionality of the side panel,
  * including word definition and other features.

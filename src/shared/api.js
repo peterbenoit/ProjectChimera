@@ -1,5 +1,5 @@
 /**
- * API Client for Project Chimera
+ * API Client for Smart Digest
  * Handles communication with OpenAI API
  */
 
