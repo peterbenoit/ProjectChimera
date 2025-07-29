@@ -162,7 +162,6 @@ function setupEventListeners() {
  */
 async function handleSummarizeClick() {
 	try {
-		showLoading(true);
 		hideError();
 
 		const format = formatSelect.value;
@@ -198,6 +197,8 @@ async function handleSummarizeClick() {
 				return; // Exit without error
 			}
 		}
+
+		showLoading(true);
 
 		const feedbackSettings = {
 			enableToneBiasAnalysis: settings.enableToneBiasAnalysis || false,
