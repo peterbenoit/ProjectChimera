@@ -1,8 +1,10 @@
-# SmartDigest
+# Smart Digest - AI Page Summarizer
 
 A Chrome extension that uses AI to summarize web pages directly from the
 browser's side panel, using your own OpenAI API key for cost-effective,
 pay-per-use summaries without monthly subscription fees.
+
+[Privacy Policy](PRIVACY.md)
 
 ## Features
 
@@ -33,7 +35,7 @@ pay-per-use summaries without monthly subscription fees.
 ### From Chrome Web Store (Coming Soon)
 
 1. Visit the Chrome Web Store
-2. Search for "SmartDigest"
+2. Search for "Smart Digest - AI Page Summarizer"
 3. Click "Add to Chrome"
 
 ### Manual Installation (Developer Mode)
@@ -112,9 +114,11 @@ details.
 
 - Built with Marked for Markdown rendering
 - Uses OpenAI API for summarization
+- Uses the free [Dictionary API](https://dictionaryapi.dev/) for definitions
 
 ### Privacy
 
 This extension processes web page content through the OpenAI API using your
-personal API key. No data is stored on our servers. Please review OpenAI's
-privacy policy for information about how they handle data sent to their API.
+personal API key. No data is stored on our servers. Please review our full
+[Privacy Policy](PRIVACY.md) for more details and refer to OpenAI's privacy
+policy for information about how they handle data sent to their API.

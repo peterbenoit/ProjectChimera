@@ -1,27 +1,30 @@
 {
-	"name": "smartdigest",
-	"version": "1.0.0.84",
-	"description": "AI-powered page summarizer Chrome extension",
-	"main": "index.js",
-	"scripts": {
-		"build": "webpack --config config/webpack.prod.js",
-		"dev": "webpack --config config/webpack.dev.js"
-	},
-	"author": "Peter Benoit",
-	"license": "MIT",
-	"devDependencies": {
-		"@babel/core": "^7.22.9",
-		"@babel/preset-env": "^7.22.9",
-		"babel-loader": "^9.1.3",
-		"copy-webpack-plugin": "^11.0.0",
-		"css-loader": "^6.8.1",
-		"html-webpack-plugin": "^5.5.3",
-		"mini-css-extract-plugin": "^2.7.6",
-		"webpack": "^5.88.2",
-		"webpack-cli": "^5.1.4",
-		"webpack-merge": "^5.9.0"
-	},
-	"dependencies": {
-		"marked": "^15.0.12"
-	}
+  "name": "smartdigest",
+  "version": "1.1.0.86",
+  "description": "AI-powered page summarizer Chrome extension",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config config/webpack.prod.js",
+    "dev": "webpack --config config/webpack.dev.js",
+    "postbuild": "node scripts/package.js",
+    "package": "node scripts/package.js"
+  },
+  "author": "Peter Benoit",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.22.9",
+    "@babel/preset-env": "^7.22.9",
+    "babel-loader": "^9.1.3",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.8.1",
+    "html-webpack-plugin": "^5.5.3",
+    "mini-css-extract-plugin": "^2.7.6",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-merge": "^5.9.0",
+    "archiver": "^5.3.1"
+  },
+  "dependencies": {
+    "marked": "^15.0.12"
+  }
 }

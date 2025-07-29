@@ -57,6 +57,8 @@ const ICONS = {
  * Initialize the sidepanel UI
  */
 function initialize() {
+	// console.log('Project Chimera sidepanel initialized');
+
 	setupTabNavigation();
 	setupEventListeners();
 	loadUserPreferences();
@@ -788,9 +790,9 @@ function updateFooterInfo() {
 				buildNumber = process.env.BUILD_NUMBER;
 			}
 		} catch (e) {
-			// console.log('Build number not available:', e);
+			// Build number not available in production
 		}
-		footerElement.textContent = `Smart Digest v1.0.1.${buildNumber}`;
+		footerElement.textContent = `Smart Digest v1.1.0`;
 	}
 }
 
@@ -803,7 +805,7 @@ function checkApiKeyAndRedirect() {
 		const apiKey = settings.apiKey;
 
 		if (!apiKey || apiKey.trim() === '') {
-			// console.log('No API key found, redirecting to settings tab');
+			// No API key found, redirecting to settings tab
 			switchToTab('settings');
 		}
 	});

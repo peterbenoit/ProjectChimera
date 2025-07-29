@@ -1,7 +1,7 @@
 {
-  "name": "SmartDigest",
-  "description": "Summarize web pages using AI directly from Chrome's side panel",
-  "version": "1.0.0.84",
+  "name": "Smart Digest - AI Page Summarizer",
+  "description": "Summarize any web page with AI. Get key insights, analysis, and definitions directly from your browser's side panel.",
+  "version": "1.1.0.86",
   "manifest_version": 3,
   "icons": {
     "16": "assets/icons/icon16.png",
@@ -37,14 +37,14 @@
     }
   ],
   "action": {
-    "default_title": "Open AI Summarizer"
+    "default_title": "Open Smart Digest"
   },
   "commands": {
     "_execute_action": {
       "suggested_key": {
         "default": "Alt+S"
       },
-      "description": "Open AI Summarizer"
+      "description": "Open Smart Digest"
     }
   }
 }
