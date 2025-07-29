@@ -555,6 +555,69 @@ input:checked+.toggle-slider:before {
 	min-width: 80px;
 }
 
+/* Timeout Dialog Styling */
+.timeout-dialog {
+	max-width: 350px;
+	width: 90%;
+}
+
+.timeout-header {
+	text-align: center;
+	margin-bottom: var(--spacing-md);
+}
+
+.timeout-header h3 {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--accent-color);
+	margin: 0;
+}
+
+.timeout-details {
+	background-color: var(--bg-secondary);
+	border-radius: var(--border-radius);
+	padding: var(--spacing-md);
+	margin: var(--spacing-md) 0;
+}
+
+.timeout-details p {
+	margin: 0 0 var(--spacing-sm) 0;
+	font-weight: 500;
+	color: var(--text-primary);
+}
+
+.timeout-details ul {
+	margin: 0;
+	padding-left: var(--spacing-lg);
+	list-style-type: disc;
+}
+
+.timeout-details li {
+	margin-bottom: var(--spacing-xs);
+	font-size: 13px;
+	color: var(--text-secondary);
+	line-height: 1.4;
+}
+
+.timeout-overlay .confirmation-buttons {
+	margin-top: var(--spacing-lg);
+}
+
+.timeout-overlay .retry-btn {
+	background-color: var(--accent-color);
+	color: white;
+	border: none;
+}
+
+.timeout-overlay .retry-btn:hover {
+	background-color: var(--accent-hover);
+}
+
+.timeout-overlay .retry-btn:focus {
+	outline: none;
+	box-shadow: 0 0 0 2px rgba(79, 109, 245, 0.3);
+}
+
 /* AI Analysis Styling */
 .analysis-header {
 	font-size: 16px;

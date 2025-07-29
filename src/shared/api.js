@@ -4,7 +4,7 @@
  */
 
 /**
- * Generate a summary using OpenAI's API
+ * Generate a summary using OpenAI's API with timeout handling and user feedback
  *
  * @param {string} content - The text content to summarize
  * @param {object} options - Summarization options
@@ -18,9 +18,24 @@
  * @param {boolean} options.feedback.enableIntentSummary - Whether to summarize intent
  * @param {boolean} options.feedback.enableFactContrast - Whether to contrast with known facts
  * @param {string} apiKey - The OpenAI API key
+ * @param {Function} onTimeout - Optional callback for timeout handling
  * @returns {Promise<string>} - The generated summary
  */
-export async function generateSummary(content, options, apiKey) {
+export async function generateSummary(content, options, apiKey, onTimeout = null) {
+	return generateSummaryWithTimeout(content, options, apiKey, 30000, onTimeout);
+}
+
+/**
+ * Generate a summary with configurable timeout and retry handling
+ *
+ * @param {string} content - The text content to summarize
+ * @param {object} options - Summarization options
+ * @param {string} apiKey - The OpenAI API key
+ * @param {number} timeoutMs - Timeout in milliseconds (default: 10000)
+ * @param {Function} onTimeout - Optional callback for timeout handling
+ * @returns {Promise<string>} - The generated summary
+ */
+export async function generateSummaryWithTimeout(content, options, apiKey, timeoutMs = 10000, onTimeout = null) {
 	try {
 		// console.log('API Client: Generating summary with options:', options);
 
@@ -37,8 +52,11 @@ export async function generateSummary(content, options, apiKey) {
 		// Generate system prompt based on options
 		const systemPrompt = getSystemPrompt(options);
 
-		// Make the actual fetch request to OpenAI API
-		const response = await fetch('https://api.openai.com/v1/chat/completions', {
+		// Create AbortController for request cancellation
+		const abortController = new AbortController();
+
+		// Create the fetch promise
+		const fetchPromise = fetch('https://api.openai.com/v1/chat/completions', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -57,13 +75,55 @@ export async function generateSummary(content, options, apiKey) {
 					}
 				],
 				temperature: 0.5 // Lower temperature for more consistent summaries
-			})
+			}),
+			signal: abortController.signal
 		});
+
+		// Handle timeout with user interaction
+		let response;
+		const timeoutHandler = setTimeout(async () => {
+			if (onTimeout) {
+				try {
+					const shouldContinue = await onTimeout();
+					if (!shouldContinue) {
+						abortController.abort();
+					}
+					// If user chooses to continue, just let the fetch continue
+				} catch (callbackError) {
+					console.error('Error in timeout callback:', callbackError);
+					abortController.abort();
+				}
+			} else {
+				// No timeout callback provided, just abort
+				abortController.abort();
+			}
+		}, timeoutMs);
+
+		try {
+			response = await fetchPromise;
+			clearTimeout(timeoutHandler);
+		} catch (error) {
+			clearTimeout(timeoutHandler);
+			if (error.name === 'AbortError') {
+				throw new Error('Request was cancelled');
+			}
+			throw error;
+		}
 
 		if (!response.ok) {
 			const errorData = await response.json().catch(() => null);
 			console.error('API error response:', errorData);
-			throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+
+			// Provide more specific error messages
+			if (response.status === 401) {
+				throw new Error('Invalid API key. Please check your OpenAI API key in settings.');
+			} else if (response.status === 429) {
+				throw new Error('Rate limit exceeded. Please try again in a few moments.');
+			} else if (response.status >= 500) {
+				throw new Error('OpenAI service is currently unavailable. Please try again later.');
+			} else {
+				throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+			}
 		}
 
 		const data = await response.json();
@@ -71,6 +131,14 @@ export async function generateSummary(content, options, apiKey) {
 
 	} catch (error) {
 		console.error('Error generating summary:', error);
+
+		// Enhance error messages for better user experience
+		if (error.name === 'AbortError') {
+			throw new Error('Request was cancelled');
+		} else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+			throw new Error('Network error. Please check your internet connection and try again.');
+		}
+
 		throw error;
 	}
 }

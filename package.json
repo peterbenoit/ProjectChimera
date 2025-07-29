@@ -1,6 +1,6 @@
 {
   "name": "smartdigest",
-  "version": "1.1.0.90",
+  "version": "1.1.0.92",
   "description": "AI-powered page summarizer Chrome extension",
   "main": "index.js",
   "scripts": {

@@ -209,13 +209,25 @@ async function handleSummarizeClick() {
 			enableFactContrast: settings.enableFactContrast || false
 		};
 
+		// Create timeout handler
+		const timeoutHandler = () => {
+			return new Promise((resolve) => {
+				showTimeoutDialog(
+					'The request is taking longer than 30 seconds. This might be due to network latency, high server load, or a complex page.',
+					() => resolve(true),  // Continue waiting
+					() => resolve(false)  // Cancel request
+				);
+			});
+		};
+
 		const summary = await generateSummary(
 			pageData.content, {
 			format,
 			length,
 			feedback: feedbackSettings
 		},
-			settings.apiKey
+			settings.apiKey,
+			timeoutHandler
 		);
 
 		displaySummary(summary);
@@ -1047,6 +1059,65 @@ function showCustomConfirmation(message, onConfirm, onCancel = () => { }) {
 		document.body.removeChild(overlay);
 		onCancel();
 	});
+}
+
+/**
+ * Show a timeout dialog with retry/cancel options
+ *
+ * @param {string} message - The timeout message
+ * @param {Function} onRetry - Callback when user chooses to continue waiting
+ * @param {Function} onCancel - Callback when user chooses to cancel
+ */
+function showTimeoutDialog(message, onRetry, onCancel) {
+	const existingOverlay = document.querySelector('.timeout-overlay');
+	if (existingOverlay) {
+		document.body.removeChild(existingOverlay);
+	}
+
+	const overlay = document.createElement('div');
+	overlay.className = 'timeout-overlay confirmation-overlay';
+
+	const dialog = document.createElement('div');
+	dialog.className = 'timeout-dialog confirmation-dialog';
+
+	dialog.innerHTML = `
+    <div class="timeout-header">
+      <h3>Request Taking Longer Than Expected</h3>
+    </div>
+    <p>${message}</p>
+    <div class="timeout-details">
+      <p><strong>Possible causes:</strong></p>
+      <ul>
+        <li>Network connectivity issues</li>
+        <li>High server load at OpenAI</li>
+        <li>Complex content requiring more processing time</li>
+        <li>API rate limiting</li>
+      </ul>
+    </div>
+    <div class="confirmation-buttons">
+      <button class="secondary-button cancel-btn">Cancel Request</button>
+      <button class="primary-button retry-btn">Continue Waiting</button>
+    </div>
+  `;
+
+	overlay.appendChild(dialog);
+	document.body.appendChild(overlay);
+
+	const retryBtn = dialog.querySelector('.retry-btn');
+	const cancelBtn = dialog.querySelector('.cancel-btn');
+
+	retryBtn.addEventListener('click', () => {
+		document.body.removeChild(overlay);
+		onRetry();
+	});
+
+	cancelBtn.addEventListener('click', () => {
+		document.body.removeChild(overlay);
+		onCancel();
+	});
+
+	// Auto-focus the continue button as it's the recommended action
+	retryBtn.focus();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
