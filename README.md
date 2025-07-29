@@ -1,4 +1,4 @@
-# Project Chimera - AI Page Summarizer
+# SmartDigest
 
 A Chrome extension that uses AI to summarize web pages directly from the
 browser's side panel, using your own OpenAI API key for cost-effective,
@@ -33,7 +33,7 @@ pay-per-use summaries without monthly subscription fees.
 ### From Chrome Web Store (Coming Soon)
 
 1. Visit the Chrome Web Store
-2. Search for "Project Chimera - AI Page Summarizer"
+2. Search for "SmartDigest"
 3. Click "Add to Chrome"
 
 ### Manual Installation (Developer Mode)

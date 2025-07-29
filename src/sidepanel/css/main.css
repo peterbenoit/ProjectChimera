@@ -98,7 +98,9 @@ body {
 .tab-content {
 	flex: 1;
 	overflow-y: auto;
-	padding: var(--spacing-md);
+	padding: var(--spacing-sm);
+	position: relative;
+	padding-top: 0;
 }
 
 .tab-panel {
@@ -113,7 +115,12 @@ body {
 	display: flex;
 	flex-wrap: wrap;
 	gap: var(--spacing-md);
-	margin-bottom: var(--spacing-md);
+	/* margin-bottom: var(--spacing-md); */
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	background-color: var(--bg-primary);
+	padding-top: var(--spacing-sm);
 }
 
 .format-controls,
@@ -159,11 +166,11 @@ select {
 }
 
 .summary-result-container {
-	margin-top: var(--spacing-lg);
-	border-radius: var(--border-radius);
-	background-color: var(--bg-secondary);
+	/* margin-top: var(--spacing-lg); */
 	min-height: 100px;
 }
+
+
 
 #summary-content {
 	padding: var(--spacing-md);
