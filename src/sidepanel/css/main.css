@@ -367,6 +367,7 @@ input:checked+.toggle-slider:before {
 
 .search-container {
 	margin-bottom: var(--spacing-md);
+	margin-top: var(--spacing-sm);
 }
 
 .search-container input {

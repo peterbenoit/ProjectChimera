@@ -185,10 +185,17 @@ async function handleSummarizeClick() {
 			(new URL(item.metadata.url).origin + new URL(item.metadata.url).pathname) === normalizedUrl
 		);
 		if (existingMatch) {
-			const confirm = window.confirm('A summary already exists for this page. Do you want to generate a new one anyway?');
-			if (!confirm) {
+			const shouldContinue = await new Promise(resolve => {
+				showCustomConfirmation(
+					'A summary already exists for this page. Do you want to generate a new one anyway?',
+					() => resolve(true), // User confirmed
+					() => resolve(false) // User canceled
+				);
+			});
+
+			if (!shouldContinue) {
 				showLoading(false);
-				return;
+				return; // Exit without error
 			}
 		}
 
