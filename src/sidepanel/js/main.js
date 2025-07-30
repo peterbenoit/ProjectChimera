@@ -42,6 +42,7 @@ const factContrastDiv = document.getElementById('fact-contrast');
 const additionalAnalysisContainer = document.getElementById('additional-analysis');
 
 let isSpeaking = false;
+let lastSummaryMetadata = null;
 
 // SVG Icons
 const ICONS = {
@@ -243,6 +244,7 @@ async function handleSummarizeClick() {
 		);
 
 		displaySummary(summary);
+		lastSummaryMetadata = pageData.metadata;
 
 		saveFormatAndLengthPreferences(format, length);
 
@@ -1140,6 +1142,12 @@ async function handleShareClick() {
 		return; // No summary to share
 	}
 
+	if (!lastSummaryMetadata) {
+		showError("Cannot share summary because the original page's data is missing. Please be sure you're on the page you want to share, else generate a new summary.");
+		console.error('Error preparing share content:', 'lastSummaryMetadata is null');
+		return;
+	}
+
 	try {
 		// Get current page data for sharing
 		const pageData = await requestPageContent();
@@ -1152,6 +1160,7 @@ async function handleShareClick() {
 		shareModal.classList.remove('hidden');
 	} catch (error) {
 		console.error('Error preparing share content:', error);
+		showError(error.message || 'An error occurred while preparing the share content.');
 	}
 }
 
