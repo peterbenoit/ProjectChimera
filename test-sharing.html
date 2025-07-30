@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Smart Digest - Sharing Feature Test</title>
+	<link rel="stylesheet" href="src/sidepanel/css/main.css">
+</head>
+
+<body>
+	<div class="app-container">
+		<header class="app-header">
+			<h1>Smart Digest - Sharing Feature Test</h1>
+		</header>
+
+		<main class="tab-content">
+			<section class="tab-panel active">
+				<div class="summary-result-container">
+					<div id="summary-content">
+						<div class="summary-header">
+							<h2 id="summary-title">Page Summary</h2>
+							<div class="summary-actions">
+								<button id="copy-btn" title="Copy to clipboard">
+									<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+										fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+										stroke-linejoin="round">
+										<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+										<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+									</svg>
+								</button>
+								<button id="speak-btn" title="Listen to summary">
+									<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+										fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+										stroke-linejoin="round">
+										<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+										<path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+									</svg>
+								</button>
+								<button id="share-btn" title="Share summary">
+									<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+										fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+										stroke-linejoin="round">
+										<circle cx="18" cy="5" r="3"></circle>
+										<circle cx="6" cy="12" r="3"></circle>
+										<circle cx="18" cy="19" r="3"></circle>
+										<line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+										<line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+									</svg>
+								</button>
+							</div>
+						</div>
+						<div id="summary-text">
+							<p>This is a sample summary of an article about artificial intelligence and its impact on
+								modern technology. The article discusses various applications of AI in different
+								industries, including healthcare, finance, and transportation.</p>
+							<p>Key points covered include machine learning algorithms, natural language processing, and
+								the ethical considerations surrounding AI development. The author emphasizes the
+								importance of responsible AI implementation and the need for proper regulation.</p>
+							<p>The summary also touches on future trends in AI technology and potential challenges that
+								organizations may face when adopting these new technologies.</p>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+	</div>
+
+	<!-- Share Modal -->
+	<div id="share-modal" class="modal-overlay hidden">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Share Summary</h3>
+				<button id="close-share-modal" class="close-button">&times;</button>
+			</div>
+			<div class="modal-body">
+				<div class="share-tabs">
+					<button class="share-tab-button active" data-platform="twitter">Twitter/X</button>
+					<button class="share-tab-button" data-platform="linkedin">LinkedIn</button>
+					<button class="share-tab-button" data-platform="facebook">Facebook</button>
+					<button class="share-tab-button" data-platform="email">Email</button>
+					<button class="share-tab-button" data-platform="general">General</button>
+				</div>
+				<div class="share-content">
+					<div id="twitter-share" class="share-panel active">
+						<div class="platform-info">
+							<p><strong>Twitter/X</strong> - Optimized for ~200 characters</p>
+						</div>
+						<textarea id="twitter-content" readonly>Key insight from "AI and Modern Technology": AI applications span healthcare, finance, and transportation with emphasis on responsible implementation.
+
+Source: https://example.com/ai-article
+Summarized with Smart Digest</textarea>
+						<div class="share-actions">
+							<button class="copy-share-btn" data-platform="twitter">Copy for Twitter/X</button>
+							<span class="char-count" id="twitter-char-count">156/200</span>
+						</div>
+					</div>
+					<div id="linkedin-share" class="share-panel hidden">
+						<div class="platform-info">
+							<p><strong>LinkedIn</strong> - Professional format with emojis</p>
+						</div>
+						<textarea id="linkedin-content" readonly>📚 Just read an insightful article: "AI and Modern Technology"
+
+Key takeaways:
+💡 AI applications span healthcare, finance, and transportation with emphasis on responsible implementation
+🔍 Key points covered include machine learning algorithms, natural language processing, and the ethical considerations surrounding AI development
+📈 The author emphasizes the importance of responsible AI implementation and the need for proper regulation
+⚡ The summary also touches on future trends in AI technology and potential challenges that organizations may face when adopting these new technologies
+
+🔗 Read the full article: https://example.com/ai-article
+
+#insights #learning #productivity
+
+Summarized with Smart Digest</textarea>
+						<div class="share-actions">
+							<button class="copy-share-btn" data-platform="linkedin">Copy for LinkedIn</button>
+							<span class="char-count" id="linkedin-char-count">847/3000</span>
+						</div>
+					</div>
+					<div id="facebook-share" class="share-panel hidden">
+						<div class="platform-info">
+							<p><strong>Facebook</strong> - Casual and engaging format</p>
+						</div>
+						<textarea id="facebook-content" readonly>Found this interesting: "AI and Modern Technology"
+
+Here are the main points:
+
+• AI applications span healthcare, finance, and transportation with emphasis on responsible implementation
+• Key points covered include machine learning algorithms, natural language processing, and the ethical considerations surrounding AI development
+• The author emphasizes the importance of responsible AI implementation and the need for proper regulation
+
+Check it out: https://example.com/ai-article
+
+Summarized with Smart Digest</textarea>
+						<div class="share-actions">
+							<button class="copy-share-btn" data-platform="facebook">Copy for Facebook</button>
+							<span class="char-count" id="facebook-char-count">612 characters</span>
+						</div>
+					</div>
+					<div id="email-share" class="share-panel hidden">
+						<div class="platform-info">
+							<p><strong>Email</strong> - Complete summary with metadata</p>
+						</div>
+						<div class="email-fields">
+							<label for="email-subject">Subject Line:</label>
+							<input type="text" id="email-subject" readonly
+								value="Article Summary: AI and Modern Technology" />
+							<label for="email-body">Email Body:</label>
+							<textarea id="email-content" readonly>Hi,
+
+I thought you might find this article interesting: "AI and Modern Technology"
+
+Here's a summary of the key points:
+
+This is a sample summary of an article about artificial intelligence and its impact on modern technology. The article discusses various applications of AI in different industries, including healthcare, finance, and transportation.
+
+Key points covered include machine learning algorithms, natural language processing, and the ethical considerations surrounding AI development. The author emphasizes the importance of responsible AI implementation and the need for proper regulation.
+
+The summary also touches on future trends in AI technology and potential challenges that organizations may face when adopting these new technologies.
+
+---
+Original Article: https://example.com/ai-article
+Summary Date: 7/30/2025
+Summarized with Smart Digest
+
+Best regards</textarea>
+						</div>
+						<div class="share-actions">
+							<button class="copy-share-btn" data-platform="email">Copy Email Content</button>
+						</div>
+					</div>
+					<div id="general-share" class="share-panel hidden">
+						<div class="platform-info">
+							<p><strong>General</strong> - Clean format for any platform</p>
+						</div>
+						<textarea id="general-content" readonly>Summary of "AI and Modern Technology"
+
+This is a sample summary of an article about artificial intelligence and its impact on modern technology. The article discusses various applications of AI in different industries, including healthcare, finance, and transportation.
+
+Key points covered include machine learning algorithms, natural language processing, and the ethical considerations surrounding AI development. The author emphasizes the importance of responsible AI implementation and the need for proper regulation.
+
+The summary also touches on future trends in AI technology and potential challenges that organizations may face when adopting these new technologies.
+
+---
+Source: https://example.com/ai-article
+Summarized with Smart Digest</textarea>
+						<div class="share-actions">
+							<button class="copy-share-btn" data-platform="general">Copy General Format</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Simple test script for sharing functionality
+		document.addEventListener('DOMContentLoaded', () => {
+			const shareBtn = document.getElementById('share-btn');
+			const shareModal = document.getElementById('share-modal');
+			const closeBtn = document.getElementById('close-share-modal');
+			const shareTabButtons = document.querySelectorAll('.share-tab-button');
+			const sharePanels = document.querySelectorAll('.share-panel');
+			const copyShareBtns = document.querySelectorAll('.copy-share-btn');
+
+			// Show modal
+			shareBtn.addEventListener('click', () => {
+				shareModal.classList.remove('hidden');
+			});
+
+			// Close modal
+			closeBtn.addEventListener('click', () => {
+				shareModal.classList.add('hidden');
+			});
+
+			// Close modal when clicking outside
+			shareModal.addEventListener('click', (e) => {
+				if (e.target === shareModal) {
+					shareModal.classList.add('hidden');
+				}
+			});
+
+			// Tab navigation
+			shareTabButtons.forEach(button => {
+				button.addEventListener('click', () => {
+					const platform = button.getAttribute('data-platform');
+
+					// Update active tab button
+					shareTabButtons.forEach(btn => btn.classList.remove('active'));
+					button.classList.add('active');
+
+					// Update active panel
+					sharePanels.forEach(panel => {
+						panel.classList.remove('active');
+						panel.classList.add('hidden');
+					});
+
+					const activePanel = document.getElementById(`${platform}-share`);
+					if (activePanel) {
+						activePanel.classList.add('active');
+						activePanel.classList.remove('hidden');
+					}
+				});
+			});
+
+			// Copy functionality
+			copyShareBtns.forEach(btn => {
+				btn.addEventListener('click', async () => {
+					const platform = btn.getAttribute('data-platform');
+					let textToCopy = '';
+
+					if (platform === 'email') {
+						const subject = document.getElementById('email-subject').value;
+						const body = document.getElementById('email-content').value;
+						textToCopy = `Subject: ${subject}\n\n${body}`;
+					} else {
+						const textarea = document.getElementById(`${platform}-content`);
+						textToCopy = textarea.value;
+					}
+
+					try {
+						await navigator.clipboard.writeText(textToCopy);
+
+						const originalText = btn.textContent;
+						btn.textContent = 'Copied!';
+						btn.style.backgroundColor = '#28a745';
+
+						setTimeout(() => {
+							btn.textContent = originalText;
+							btn.style.backgroundColor = '';
+						}, 1500);
+					} catch (error) {
+						console.error('Failed to copy text:', error);
+						alert('Copy failed. Please select and copy the text manually.');
+					}
+				});
+			});
+		});
+	</script>
+</body>
+
+</html>

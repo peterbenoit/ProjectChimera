@@ -58,6 +58,7 @@
 							<div class="summary-actions">
 								<button id="copy-btn" title="Copy to clipboard"></button>
 								<button id="speak-btn" title="Listen to summary"></button>
+								<button id="share-btn" title="Share summary"></button>
 							</div>
 						</div>
 						<div id="summary-text"></div>
@@ -211,6 +212,80 @@
 		<footer class="app-footer">
 			<p>Smart Digest v1.0.1</p>
 		</footer>
+	</div>
+
+	<!-- Share Modal -->
+	<div id="share-modal" class="modal-overlay hidden">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Share Summary</h3>
+				<button id="close-share-modal" class="close-button">&times;</button>
+			</div>
+			<div class="modal-body">
+				<div class="share-tabs">
+					<button class="share-tab-button active" data-platform="twitter">Twitter/X</button>
+					<button class="share-tab-button" data-platform="linkedin">LinkedIn</button>
+					<button class="share-tab-button" data-platform="facebook">Facebook</button>
+					<button class="share-tab-button" data-platform="email">Email</button>
+					<button class="share-tab-button" data-platform="general">General</button>
+				</div>
+				<div class="share-content">
+					<div id="twitter-share" class="share-panel active">
+						<div class="platform-info">
+							<p><strong>Twitter/X</strong> - Optimized for ~200 characters</p>
+						</div>
+						<textarea id="twitter-content" readonly></textarea>
+						<div class="share-actions">
+							<button class="copy-share-btn" data-platform="twitter">Copy for Twitter/X</button>
+							<span class="char-count" id="twitter-char-count">0/200</span>
+						</div>
+					</div>
+					<div id="linkedin-share" class="share-panel hidden">
+						<div class="platform-info">
+							<p><strong>LinkedIn</strong> - Professional format with emojis</p>
+						</div>
+						<textarea id="linkedin-content" readonly></textarea>
+						<div class="share-actions">
+							<button class="copy-share-btn" data-platform="linkedin">Copy for LinkedIn</button>
+							<span class="char-count" id="linkedin-char-count">0/3000</span>
+						</div>
+					</div>
+					<div id="facebook-share" class="share-panel hidden">
+						<div class="platform-info">
+							<p><strong>Facebook</strong> - Casual and engaging format</p>
+						</div>
+						<textarea id="facebook-content" readonly></textarea>
+						<div class="share-actions">
+							<button class="copy-share-btn" data-platform="facebook">Copy for Facebook</button>
+							<span class="char-count" id="facebook-char-count">0 characters</span>
+						</div>
+					</div>
+					<div id="email-share" class="share-panel hidden">
+						<div class="platform-info">
+							<p><strong>Email</strong> - Complete summary with metadata</p>
+						</div>
+						<div class="email-fields">
+							<label for="email-subject">Subject Line:</label>
+							<input type="text" id="email-subject" readonly />
+							<label for="email-body">Email Body:</label>
+							<textarea id="email-content" readonly></textarea>
+						</div>
+						<div class="share-actions">
+							<button class="copy-share-btn" data-platform="email">Copy Email Content</button>
+						</div>
+					</div>
+					<div id="general-share" class="share-panel hidden">
+						<div class="platform-info">
+							<p><strong>General</strong> - Clean format for any platform</p>
+						</div>
+						<textarea id="general-content" readonly></textarea>
+						<div class="share-actions">
+							<button class="copy-share-btn" data-platform="general">Copy General Format</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<script type="module" src="js/main.js"></script>

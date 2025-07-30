@@ -841,3 +841,251 @@ input:checked+.toggle-slider:before {
 .analysis-section p {
 	margin-bottom: var(--spacing-md);
 }
+
+/* Share Modal Styles */
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+}
+
+.modal-overlay.hidden {
+	display: none;
+}
+
+.modal-content {
+	background-color: var(--bg-primary);
+	border-radius: var(--border-radius);
+	width: 90%;
+	max-width: 500px;
+	max-height: 80vh;
+	overflow: hidden;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: var(--spacing-lg);
+	border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 500;
+	color: var(--text-primary);
+}
+
+.close-button {
+	background: none;
+	border: none;
+	font-size: 24px;
+	cursor: pointer;
+	color: var(--text-secondary);
+	padding: 0;
+	width: 30px;
+	height: 30px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--border-radius);
+}
+
+.close-button:hover {
+	color: var(--text-primary);
+	background-color: var(--bg-secondary);
+}
+
+.modal-body {
+	padding: var(--spacing-lg);
+	overflow-y: auto;
+	max-height: calc(80vh - 80px);
+}
+
+.share-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--spacing-xs);
+	margin-bottom: var(--spacing-lg);
+	border-bottom: 1px solid var(--border-color);
+	padding-bottom: var(--spacing-md);
+}
+
+.share-tab-button {
+	padding: var(--spacing-sm) var(--spacing-md);
+	background: none;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	cursor: pointer;
+	color: var(--text-secondary);
+	font-size: 13px;
+	font-weight: 500;
+	transition: all 0.2s ease;
+}
+
+.share-tab-button:hover {
+	color: var(--text-primary);
+	background-color: var(--bg-secondary);
+}
+
+.share-tab-button.active {
+	color: white;
+	background-color: var(--accent-color);
+	border-color: var(--accent-color);
+}
+
+.share-content {
+	position: relative;
+}
+
+.share-panel {
+	display: none;
+}
+
+.share-panel.active {
+	display: block;
+}
+
+.share-panel.hidden {
+	display: none;
+}
+
+.platform-info {
+	margin-bottom: var(--spacing-md);
+	padding: var(--spacing-sm);
+	background-color: var(--bg-secondary);
+	border-radius: var(--border-radius);
+}
+
+.platform-info p {
+	margin: 0;
+	font-size: 13px;
+	color: var(--text-secondary);
+}
+
+.share-panel textarea {
+	width: 100%;
+	min-height: 120px;
+	padding: var(--spacing-md);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background-color: var(--bg-primary);
+	color: var(--text-primary);
+	font-family: inherit;
+	font-size: 13px;
+	line-height: 1.5;
+	resize: vertical;
+	margin-bottom: var(--spacing-md);
+}
+
+.share-panel textarea:focus {
+	outline: none;
+	border-color: var(--accent-color);
+	box-shadow: 0 0 0 2px rgba(79, 109, 245, 0.1);
+}
+
+.email-fields {
+	margin-bottom: var(--spacing-md);
+}
+
+.email-fields label {
+	display: block;
+	margin-bottom: var(--spacing-xs);
+	margin-top: var(--spacing-md);
+	color: var(--text-secondary);
+	font-size: 13px;
+	font-weight: 500;
+}
+
+.email-fields label:first-child {
+	margin-top: 0;
+}
+
+.email-fields input {
+	width: 100%;
+	padding: var(--spacing-sm);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background-color: var(--bg-primary);
+	color: var(--text-primary);
+	font-size: 13px;
+	margin-bottom: var(--spacing-md);
+}
+
+.email-fields input:focus {
+	outline: none;
+	border-color: var(--accent-color);
+	box-shadow: 0 0 0 2px rgba(79, 109, 245, 0.1);
+}
+
+.email-fields textarea {
+	min-height: 200px;
+}
+
+.share-actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.copy-share-btn {
+	padding: var(--spacing-sm) var(--spacing-lg);
+	background-color: var(--accent-color);
+	color: white;
+	border: none;
+	border-radius: var(--border-radius);
+	cursor: pointer;
+	font-weight: 500;
+	font-size: 13px;
+	transition: background-color 0.2s ease;
+}
+
+.copy-share-btn:hover {
+	background-color: var(--accent-hover);
+}
+
+.copy-share-btn:focus {
+	outline: none;
+	box-shadow: 0 0 0 2px rgba(79, 109, 245, 0.3);
+}
+
+.char-count {
+	font-size: 12px;
+	color: var(--text-secondary);
+	font-weight: 500;
+}
+
+/* Share button in summary actions */
+.summary-actions {
+	display: flex;
+	gap: var(--spacing-xs);
+}
+
+#share-btn {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: var(--spacing-xs);
+	color: var(--text-secondary);
+	border-radius: var(--border-radius);
+	transition: all 0.2s ease;
+}
+
+#share-btn:hover {
+	color: var(--text-primary);
+	background-color: var(--bg-secondary);
+}
+
+#share-btn:focus {
+	outline: none;
+	box-shadow: 0 0 0 2px rgba(79, 109, 245, 0.3);
+}

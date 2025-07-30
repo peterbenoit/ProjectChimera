@@ -49,6 +49,7 @@ const ICONS = {
 	check: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
 	volumeOn: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
 	volumeOff: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`,
+	share: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`,
 	delete: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`
 };
 
@@ -75,6 +76,8 @@ function initialize() {
 function injectIcons() {
 	if (copyBtn) copyBtn.innerHTML = ICONS.copy;
 	if (speakBtn) speakBtn.innerHTML = ICONS.volumeOn;
+	const shareBtn = document.getElementById('share-btn');
+	if (shareBtn) shareBtn.innerHTML = ICONS.share;
 }
 
 /**
@@ -155,6 +158,15 @@ function setupEventListeners() {
 			loadHistoryData();
 		});
 	}
+
+	// Share functionality
+	const shareBtn = document.getElementById('share-btn');
+	if (shareBtn) {
+		shareBtn.addEventListener('click', handleShareClick);
+	}
+
+	// Share modal functionality
+	setupShareModal();
 }
 
 /**
@@ -1118,6 +1130,299 @@ function showTimeoutDialog(message, onRetry, onCancel) {
 
 	// Auto-focus the continue button as it's the recommended action
 	retryBtn.focus();
+}
+
+/**
+ * Handle share button click
+ */
+async function handleShareClick() {
+	if (!summaryText.textContent) {
+		return; // No summary to share
+	}
+
+	try {
+		// Get current page data for sharing
+		const pageData = await requestPageContent();
+
+		// Generate platform-specific content
+		await generateShareContent(summaryText.textContent, pageData.metadata);
+
+		// Show the share modal
+		const shareModal = document.getElementById('share-modal');
+		shareModal.classList.remove('hidden');
+	} catch (error) {
+		console.error('Error preparing share content:', error);
+	}
+}
+
+/**
+ * Set up share modal functionality
+ */
+function setupShareModal() {
+	const shareModal = document.getElementById('share-modal');
+	const closeBtn = document.getElementById('close-share-modal');
+	const shareTabButtons = document.querySelectorAll('.share-tab-button');
+	const sharePanels = document.querySelectorAll('.share-panel');
+	const copyShareBtns = document.querySelectorAll('.copy-share-btn');
+
+	// Close modal functionality
+	if (closeBtn) {
+		closeBtn.addEventListener('click', () => {
+			shareModal.classList.add('hidden');
+		});
+	}
+
+	// Close modal when clicking outside
+	shareModal.addEventListener('click', (e) => {
+		if (e.target === shareModal) {
+			shareModal.classList.add('hidden');
+		}
+	});
+
+	// Share tab navigation
+	shareTabButtons.forEach(button => {
+		button.addEventListener('click', () => {
+			const platform = button.getAttribute('data-platform');
+
+			// Update active tab button
+			shareTabButtons.forEach(btn => btn.classList.remove('active'));
+			button.classList.add('active');
+
+			// Update active panel
+			sharePanels.forEach(panel => {
+				panel.classList.remove('active');
+				panel.classList.add('hidden');
+			});
+
+			const activePanel = document.getElementById(`${platform}-share`);
+			if (activePanel) {
+				activePanel.classList.add('active');
+				activePanel.classList.remove('hidden');
+			}
+		});
+	});
+
+	// Copy functionality for each platform
+	copyShareBtns.forEach(btn => {
+		btn.addEventListener('click', async () => {
+			const platform = btn.getAttribute('data-platform');
+			let textToCopy = '';
+
+			if (platform === 'email') {
+				// For email, copy both subject and body
+				const subject = document.getElementById('email-subject').value;
+				const body = document.getElementById('email-content').value;
+				textToCopy = `Subject: ${subject}\n\n${body}`;
+			} else {
+				// For other platforms, copy the textarea content
+				const textarea = document.getElementById(`${platform}-content`);
+				textToCopy = textarea.value;
+			}
+
+			try {
+				await navigator.clipboard.writeText(textToCopy);
+
+				// Show success feedback
+				const originalText = btn.textContent;
+				btn.textContent = 'Copied!';
+				btn.style.backgroundColor = '#28a745';
+
+				setTimeout(() => {
+					btn.textContent = originalText;
+					btn.style.backgroundColor = '';
+				}, 1500);
+			} catch (error) {
+				console.error('Failed to copy text:', error);
+			}
+		});
+	});
+}
+
+/**
+ * Generate platform-specific share content
+ * @param {string} summary - The summary text
+ * @param {Object} metadata - Page metadata
+ */
+async function generateShareContent(summary, metadata) {
+	const title = metadata.title || 'Untitled Page';
+	const url = metadata.url;
+	const timestamp = new Date().toLocaleDateString();
+
+	// Generate content for each platform
+	const twitterContent = generateTwitterContent(summary, title, url);
+	const linkedinContent = generateLinkedInContent(summary, title, url);
+	const facebookContent = generateFacebookContent(summary, title, url);
+	const emailContent = generateEmailContent(summary, title, url, timestamp);
+	const generalContent = generateGeneralContent(summary, title, url);
+
+	// Update UI elements
+	updateSharePanel('twitter', twitterContent);
+	updateSharePanel('linkedin', linkedinContent);
+	updateSharePanel('facebook', facebookContent);
+	updateEmailPanel(emailContent);
+	updateSharePanel('general', generalContent);
+}
+
+/**
+ * Generate Twitter/X optimized content
+ * @param {string} summary - The summary text
+ * @param {string} title - Page title
+ * @param {string} url - Page URL
+ * @returns {string} Twitter-optimized content
+ */
+function generateTwitterContent(summary, title, url) {
+	// Extract key insight from summary (first meaningful sentence)
+	const sentences = summary.split(/[.!?]+/).filter(s => s.trim().length > 20);
+	const keyInsight = sentences[0]?.trim() || summary.substring(0, 100);
+
+	// Build tweet with character limit in mind
+	const baseText = `Key insight from "${title}": ${keyInsight}`;
+	const attribution = `\n\nSource: ${url}\nSummarized with Smart Digest`;
+
+	const maxContentLength = 200 - attribution.length;
+	let content = baseText;
+
+	if (content.length > maxContentLength) {
+		content = content.substring(0, maxContentLength - 3) + '...';
+	}
+
+	return content + attribution;
+}
+
+/**
+ * Generate LinkedIn optimized content
+ * @param {string} summary - The summary text
+ * @param {string} title - Page title
+ * @param {string} url - Page URL
+ * @returns {string} LinkedIn-optimized content
+ */
+function generateLinkedInContent(summary, title, url) {
+	// Extract key points from summary
+	const sentences = summary.split(/[.!?]+/).filter(s => s.trim().length > 15);
+	const keyPoints = sentences.slice(0, 4).map(s => s.trim());
+
+	let content = `📚 Just read an insightful article: "${title}"\n\n`;
+	content += `Key takeaways:\n`;
+
+	keyPoints.forEach((point, index) => {
+		const emoji = ['💡', '🔍', '📈', '⚡'][index] || '•';
+		content += `${emoji} ${point}\n`;
+	});
+
+	content += `\n🔗 Read the full article: ${url}`;
+	content += `\n\n#insights #learning #productivity`;
+	content += `\n\nSummarized with Smart Digest`;
+
+	return content;
+}
+
+/**
+ * Generate Facebook optimized content
+ * @param {string} summary - The summary text
+ * @param {string} title - Page title
+ * @param {string} url - Page URL
+ * @returns {string} Facebook-optimized content
+ */
+function generateFacebookContent(summary, title, url) {
+	// Extract main points in a conversational tone
+	const sentences = summary.split(/[.!?]+/).filter(s => s.trim().length > 15);
+	const mainPoints = sentences.slice(0, 3).map(s => s.trim());
+
+	let content = `Found this interesting: "${title}"\n\n`;
+
+	if (mainPoints.length > 0) {
+		content += `Here are the main points:\n\n`;
+		mainPoints.forEach(point => {
+			content += `• ${point}\n`;
+		});
+	}
+
+	content += `\nCheck it out: ${url}`;
+	content += `\n\nSummarized with Smart Digest`;
+
+	return content;
+}
+
+/**
+ * Generate email optimized content
+ * @param {string} summary - The summary text
+ * @param {string} title - Page title
+ * @param {string} url - Page URL
+ * @param {string} timestamp - Current date
+ * @returns {Object} Email content with subject and body
+ */
+function generateEmailContent(summary, title, url, timestamp) {
+	const subject = `Article Summary: ${title}`;
+
+	let body = `Hi,\n\n`;
+	body += `I thought you might find this article interesting: "${title}"\n\n`;
+	body += `Here's a summary of the key points:\n\n`;
+	body += `${summary}\n\n`;
+	body += `---\n`;
+	body += `Original Article: ${url}\n`;
+	body += `Summary Date: ${timestamp}\n`;
+	body += `Summarized with Smart Digest\n\n`;
+	body += `Best regards`;
+
+	return { subject, body };
+}
+
+/**
+ * Generate general format content
+ * @param {string} summary - The summary text
+ * @param {string} title - Page title
+ * @param {string} url - Page URL
+ * @returns {string} General format content
+ */
+function generateGeneralContent(summary, title, url) {
+	let content = `Summary of "${title}"\n\n`;
+	content += `${summary}\n\n`;
+	content += `---\n`;
+	content += `Source: ${url}\n`;
+	content += `Summarized with Smart Digest`;
+
+	return content;
+}
+
+/**
+ * Update share panel content
+ * @param {string} platform - Platform name
+ * @param {string} content - Content to display
+ */
+function updateSharePanel(platform, content) {
+	const textarea = document.getElementById(`${platform}-content`);
+	if (textarea) {
+		textarea.value = content;
+
+		// Update character count if applicable
+		const charCountElement = document.getElementById(`${platform}-char-count`);
+		if (charCountElement) {
+			if (platform === 'twitter') {
+				charCountElement.textContent = `${content.length}/200`;
+			} else if (platform === 'linkedin') {
+				charCountElement.textContent = `${content.length}/3000`;
+			} else if (platform === 'facebook') {
+				charCountElement.textContent = `${content.length} characters`;
+			}
+		}
+	}
+}
+
+/**
+ * Update email panel content
+ * @param {Object} emailContent - Email content with subject and body
+ */
+function updateEmailPanel(emailContent) {
+	const subjectInput = document.getElementById('email-subject');
+	const bodyTextarea = document.getElementById('email-content');
+
+	if (subjectInput) {
+		subjectInput.value = emailContent.subject;
+	}
+
+	if (bodyTextarea) {
+		bodyTextarea.value = emailContent.body;
+	}
 }
 
 document.addEventListener('DOMContentLoaded', () => {
