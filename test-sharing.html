@@ -194,14 +194,103 @@ Summarized with Smart Digest</textarea>
 	</div>
 
 	<script>
+		// URL shortening function
+		async function shortenUrl(url) {
+			try {
+				const response = await fetch('https://smawl.vercel.app/api/shorten', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ url: url })
+				});
+
+				if (response.ok) {
+					const data = await response.json();
+					return data.shortUrl || url;
+				} else {
+					console.warn('URL shortening failed, using original URL');
+					return url;
+				}
+			} catch (error) {
+				console.warn('URL shortening error:', error);
+				return url;
+			}
+		}
+
+		// Generate content with shortened URLs
+		async function generateShareContent() {
+			const originalUrl = 'https://example.com/ai-article';
+			const shortUrl = await shortenUrl(originalUrl);
+
+			// Update Twitter content
+			const twitterContent = `Key insight from "AI and Modern Technology": AI applications span healthcare, finance, and transportation with emphasis on responsible implementation.
+
+Source: ${shortUrl}
+Summarized with Smart Digest`;
+			document.getElementById('twitter-content').value = twitterContent;
+			document.getElementById('twitter-char-count').textContent = `${twitterContent.length}/200`;
+
+			// Update LinkedIn content
+			const linkedinContent = `📚 Just read an insightful article: "AI and Modern Technology"
+
+Key takeaways:
+💡 AI applications span healthcare, finance, and transportation with emphasis on responsible implementation
+🔍 Key points covered include machine learning algorithms, natural language processing, and the ethical considerations surrounding AI development
+📈 The author emphasizes the importance of responsible AI implementation and the need for proper regulation
+⚡ The summary also touches on future trends in AI technology and potential challenges that organizations may face when adopting these new technologies
+
+🔗 Read the full article: ${shortUrl}
+
+#insights #learning #productivity
+
+Summarized with Smart Digest`;
+			document.getElementById('linkedin-content').value = linkedinContent;
+			document.getElementById('linkedin-char-count').textContent = `${linkedinContent.length}/3000`;
+
+			// Update Facebook content
+			const facebookContent = `Found this interesting: "AI and Modern Technology"
+
+Here are the main points:
+
+• AI applications span healthcare, finance, and transportation with emphasis on responsible implementation
+• Key points covered include machine learning algorithms, natural language processing, and the ethical considerations surrounding AI development
+• The author emphasizes the importance of responsible AI implementation and the need for proper regulation
+
+Check it out: ${shortUrl}
+
+Summarized with Smart Digest`;
+			document.getElementById('facebook-content').value = facebookContent;
+			document.getElementById('facebook-char-count').textContent = `${facebookContent.length} characters`;
+
+			// Update General content
+			const generalContent = `Summary of "AI and Modern Technology"
+
+This is a sample summary of an article about artificial intelligence and its impact on modern technology. The article discusses various applications of AI in different industries, including healthcare, finance, and transportation.
+
+Key points covered include machine learning algorithms, natural language processing, and the ethical considerations surrounding AI development. The author emphasizes the importance of responsible AI implementation and the need for proper regulation.
+
+The summary also touches on future trends in AI technology and potential challenges that organizations may face when adopting these new technologies.
+
+---
+Source: ${shortUrl}
+Summarized with Smart Digest`;
+			document.getElementById('general-content').value = generalContent;
+
+			console.log('URLs shortened successfully:', { original: originalUrl, shortened: shortUrl });
+		}
+
 		// Simple test script for sharing functionality
-		document.addEventListener('DOMContentLoaded', () => {
+		document.addEventListener('DOMContentLoaded', async () => {
 			const shareBtn = document.getElementById('share-btn');
 			const shareModal = document.getElementById('share-modal');
 			const closeBtn = document.getElementById('close-share-modal');
 			const shareTabButtons = document.querySelectorAll('.share-tab-button');
 			const sharePanels = document.querySelectorAll('.share-panel');
 			const copyShareBtns = document.querySelectorAll('.copy-share-btn');
+
+			// Generate content with shortened URLs on page load
+			await generateShareContent();
 
 			// Show modal
 			shareBtn.addEventListener('click', () => {

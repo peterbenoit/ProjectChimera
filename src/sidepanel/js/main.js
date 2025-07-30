@@ -1239,21 +1239,52 @@ function setupShareModal() {
 }
 
 /**
+ * Shorten URL using the smawl service
+ * @param {string} url - The URL to shorten
+ * @returns {Promise<string>} - The shortened URL or original URL if shortening fails
+ */
+async function shortenUrl(url) {
+	try {
+		const response = await fetch('https://smawl.vercel.app/api/shorten', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ url: url })
+		});
+
+		if (response.ok) {
+			const data = await response.json();
+			return data.shortUrl || url;
+		} else {
+			console.warn('URL shortening failed, using original URL');
+			return url;
+		}
+	} catch (error) {
+		console.warn('URL shortening error:', error);
+		return url; // Fallback to original URL
+	}
+}
+
+/**
  * Generate platform-specific share content
  * @param {string} summary - The summary text
  * @param {Object} metadata - Page metadata
  */
 async function generateShareContent(summary, metadata) {
 	const title = metadata.title || 'Untitled Page';
-	const url = metadata.url;
+	const originalUrl = metadata.url;
 	const timestamp = new Date().toLocaleDateString();
 
+	// Shorten the URL for social media platforms
+	const shortUrl = await shortenUrl(originalUrl);
+
 	// Generate content for each platform
-	const twitterContent = generateTwitterContent(summary, title, url);
-	const linkedinContent = generateLinkedInContent(summary, title, url);
-	const facebookContent = generateFacebookContent(summary, title, url);
-	const emailContent = generateEmailContent(summary, title, url, timestamp);
-	const generalContent = generateGeneralContent(summary, title, url);
+	const twitterContent = generateTwitterContent(summary, title, shortUrl);
+	const linkedinContent = generateLinkedInContent(summary, title, shortUrl);
+	const facebookContent = generateFacebookContent(summary, title, shortUrl);
+	const emailContent = generateEmailContent(summary, title, originalUrl, timestamp); // Use original URL for email
+	const generalContent = generateGeneralContent(summary, title, shortUrl);
 
 	// Update UI elements
 	updateSharePanel('twitter', twitterContent);
