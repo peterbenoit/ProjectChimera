@@ -617,6 +617,38 @@ select:focus {
 	box-shadow: 0 0 0 3px var(--accent-light);
 }
 
+/* API Key specific styling */
+#api-key {
+	font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+	letter-spacing: 0.5px;
+	transition: all 0.3s ease;
+	padding-left: 35px;
+}
+
+#api-key::placeholder {
+	font-family: var(--font-family);
+	letter-spacing: normal;
+	font-style: italic;
+}
+
+/* Success state for valid API key format */
+#api-key.valid {
+	border-color: var(--success-color);
+}
+
+#api-key.valid:focus {
+	box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Warning state for partial entry */
+#api-key.partial {
+	border-color: var(--warning-color);
+}
+
+#api-key.partial:focus {
+	box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
 /* Toggle Switch */
 .toggle-switch {
 	position: relative;

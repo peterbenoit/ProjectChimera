@@ -130,6 +130,31 @@ function setupEventListeners() {
 		themeSelect.addEventListener('change', handleThemeChange);
 	}
 
+	// API key field event listeners for better UX
+	if (apiKeyInput) {
+		// Clear field when user focuses (if it contains masked content)
+		apiKeyInput.addEventListener('focus', () => {
+			if (apiKeyInput.value.includes('*')) {
+				apiKeyInput.value = '';
+				apiKeyInput.placeholder = 'Enter your OpenAI API key';
+			}
+		});
+
+		// Show helpful text based on what user types
+		apiKeyInput.addEventListener('input', () => {
+			const value = apiKeyInput.value.trim();
+
+			// Remove all validation classes first
+			apiKeyInput.classList.remove('valid', 'partial');
+
+			if (value.startsWith('sk-') && value.length > 20) {
+				apiKeyInput.classList.add('valid'); // Green for valid format
+			} else if (value.length > 0 && !value.includes('*')) {
+				apiKeyInput.classList.add('partial'); // Yellow for partial entry
+			}
+		});
+	}
+
 	const retryBtn = document.getElementById('retry-btn');
 	if (retryBtn) {
 		retryBtn.addEventListener('click', handleSummarizeClick);
@@ -382,28 +407,51 @@ function handleSpeakClick() {
  * Handle save settings button click
  */
 function handleSaveSettings() {
-	const settings = {
-		theme: themeSelect.value,
-		apiKey: apiKeyInput.value,
-		enableContentScript: document.getElementById('enable-content-script').checked,
-		enableToneBiasAnalysis: document.getElementById('enable-tone-bias-analysis').checked,
-		enableHighlightVagueClaims: document.getElementById('enable-highlight-vague-claims').checked,
-		enableCounterpoints: document.getElementById('enable-counterpoints').checked,
-		enableSentimentDetection: document.getElementById('enable-sentiment-detection').checked,
-		enableIntentSummary: document.getElementById('enable-intent-summary').checked,
-		enableFactContrast: document.getElementById('enable-fact-contrast').checked
-	};
+	// Get current API key from storage to check if we need to update it
+	chrome.storage.local.get(['settings'], (data) => {
+		const currentSettings = data.settings || {};
+		const currentApiKey = currentSettings.apiKey || '';
 
-	chrome.storage.local.set({
-		settings
-	}, () => {
-		const originalHTML = saveSettingsBtn.innerHTML;
-		saveSettingsBtn.innerHTML = '<i class="ri-check-line"></i><span>Saved!</span>';
-		setTimeout(() => {
-			saveSettingsBtn.innerHTML = originalHTML;
-		}, 1500);
+		// Check if the input contains a masked key (contains asterisks)
+		const inputValue = apiKeyInput.value.trim();
+		let apiKeyToSave = currentApiKey; // Default to keeping existing key
 
-		applyTheme(settings.theme);
+		// Only update API key if:
+		// 1. Input doesn't contain asterisks (not masked), OR
+		// 2. Input is empty (user wants to clear it), OR
+		// 3. Input starts with 'sk-' (new OpenAI key format)
+		if (inputValue === '' ||
+			(!inputValue.includes('*') && inputValue.length > 10) ||
+			inputValue.startsWith('sk-')) {
+			apiKeyToSave = inputValue;
+		}
+
+		const settings = {
+			theme: themeSelect.value,
+			apiKey: apiKeyToSave,
+			enableContentScript: document.getElementById('enable-content-script').checked,
+			enableToneBiasAnalysis: document.getElementById('enable-tone-bias-analysis').checked,
+			enableHighlightVagueClaims: document.getElementById('enable-highlight-vague-claims').checked,
+			enableCounterpoints: document.getElementById('enable-counterpoints').checked,
+			enableSentimentDetection: document.getElementById('enable-sentiment-detection').checked,
+			enableIntentSummary: document.getElementById('enable-intent-summary').checked,
+			enableFactContrast: document.getElementById('enable-fact-contrast').checked
+		};
+
+		chrome.storage.local.set({
+			settings
+		}, () => {
+			const originalHTML = saveSettingsBtn.innerHTML;
+			saveSettingsBtn.innerHTML = '<i class="ri-check-line"></i><span>Saved!</span>';
+			setTimeout(() => {
+				saveSettingsBtn.innerHTML = originalHTML;
+			}, 1500);
+
+			applyTheme(settings.theme);
+
+			// Refresh the masked display
+			loadUserPreferences();
+		});
 	});
 }
 
@@ -441,7 +489,22 @@ function loadUserPreferences() {
 	chrome.storage.local.get(['settings', 'formatPreference', 'lengthPreference'], data => {
 		if (data.settings) {
 			if (themeSelect) themeSelect.value = data.settings.theme || 'system';
-			if (apiKeyInput) apiKeyInput.value = data.settings.apiKey || '';
+
+			// Handle API key display securely
+			if (apiKeyInput) {
+				const apiKey = data.settings.apiKey || '';
+				if (apiKey) {
+					// Show masked version: sk-...xyz (first 3 + last 3 characters)
+					const maskedKey = apiKey.length > 6 ?
+						`${apiKey.substring(0, 3)}${'*'.repeat(Math.min(20, apiKey.length - 6))}${apiKey.substring(apiKey.length - 3)}` :
+						'*'.repeat(apiKey.length);
+					apiKeyInput.value = maskedKey;
+					apiKeyInput.placeholder = 'API key is set (click to change)';
+				} else {
+					apiKeyInput.value = '';
+					apiKeyInput.placeholder = 'Enter your OpenAI API key';
+				}
+			}
 
 			if (document.getElementById('enable-content-script')) {
 				document.getElementById('enable-content-script').checked =
