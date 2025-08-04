@@ -70,6 +70,7 @@ function initialize() {
 	initSidepanelWordDefinition();
 	injectIcons();
 	loadCurrentPageInfo();
+	setupPageInfoUpdates();
 }
 
 /**
@@ -1530,6 +1531,42 @@ function updateEmailPanel(emailContent) {
 }
 
 /**
+ * Set up listeners for page info updates
+ */
+function setupPageInfoUpdates() {
+	// Listen for tab updates (URL changes, title changes, etc.)
+	if (chrome.tabs && chrome.tabs.onUpdated) {
+		chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+			// Only update if this is the active tab and something relevant changed
+			chrome.tabs.query({ active: true, currentWindow: true }, (activeTabs) => {
+				if (activeTabs[0] && activeTabs[0].id === tabId) {
+					// Update page info when URL, title, or favicon changes
+					if (changeInfo.url || changeInfo.title || changeInfo.favIconUrl || changeInfo.status === 'complete') {
+						loadCurrentPageInfo();
+					}
+				}
+			});
+		});
+	}
+
+	// Listen for tab activation (switching between tabs)
+	if (chrome.tabs && chrome.tabs.onActivated) {
+		chrome.tabs.onActivated.addListener((activeInfo) => {
+			loadCurrentPageInfo();
+		});
+	}
+
+	// Listen for window focus changes
+	if (chrome.windows && chrome.windows.onFocusChanged) {
+		chrome.windows.onFocusChanged.addListener((windowId) => {
+			if (windowId !== chrome.windows.WINDOW_ID_NONE) {
+				loadCurrentPageInfo();
+			}
+		});
+	}
+}
+
+/**
  * Load current page information and populate the page info card
  */
 async function loadCurrentPageInfo() {
@@ -1552,14 +1589,52 @@ async function loadCurrentPageInfo() {
 			}
 
 			const tab = tabs[0];
-			const url = new URL(tab.url);
-			const domain = url.hostname;
 			const title = tab.title || 'Untitled Page';
+			let domain = '';
+			let status = 'Ready to summarize';
 
-			// Check if it's a special Chrome page
-			if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
-				updatePageInfo(title, tab.url, domain, 'Chrome internal page');
+			// Check if it's a special Chrome page or extension page
+			if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('moz-extension://') || tab.url.startsWith('edge-extension://')) {
+				// Handle special browser pages
+				if (tab.url.startsWith('chrome://')) {
+					domain = 'Chrome';
+					status = 'Chrome internal page';
+				} else if (tab.url.startsWith('chrome-extension://')) {
+					domain = 'Extension';
+					status = 'Chrome extension page';
+				} else {
+					domain = 'Browser';
+					status = 'Browser internal page';
+				}
+
+				updatePageInfo(title, tab.url, domain, status);
+
+				// Handle favicon for special pages
+				if (tab.favIconUrl && tab.favIconUrl !== '') {
+					pageFavicon.src = tab.favIconUrl;
+					pageFavicon.style.display = 'block';
+					fallbackIcon.style.display = 'none';
+
+					pageFavicon.onerror = () => {
+						pageFavicon.style.display = 'none';
+						fallbackIcon.style.display = 'flex';
+					};
+				} else {
+					pageFavicon.style.display = 'none';
+					fallbackIcon.style.display = 'flex';
+				}
 				return;
+			}
+
+			// Try to parse regular URLs
+			try {
+				const url = new URL(tab.url);
+				domain = url.hostname;
+			} catch (error) {
+				// If URL parsing fails, extract domain manually or use fallback
+				console.warn('Failed to parse URL:', tab.url, error);
+				const urlMatch = tab.url.match(/^https?:\/\/([^\/]+)/);
+				domain = urlMatch ? urlMatch[1] : 'Unknown';
 			}
 
 			// Try to get favicon
@@ -1579,7 +1654,7 @@ async function loadCurrentPageInfo() {
 			}
 
 			// Update page information
-			updatePageInfo(title, tab.url, domain, 'Ready to summarize');
+			updatePageInfo(title, tab.url, domain, status);
 		});
 
 	} catch (error) {
