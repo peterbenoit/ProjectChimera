@@ -44,14 +44,14 @@ const additionalAnalysisContainer = document.getElementById('additional-analysis
 let isSpeaking = false;
 let lastSummaryMetadata = null;
 
-// SVG Icons
+// Remix Icons
 const ICONS = {
-	copy: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
-	check: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
-	volumeOn: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
-	volumeOff: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`,
-	share: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`,
-	delete: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`
+	copy: `<i class="ri-file-copy-line"></i>`,
+	check: `<i class="ri-check-line"></i>`,
+	volumeOn: `<i class="ri-volume-up-line"></i>`,
+	volumeOff: `<i class="ri-volume-mute-line"></i>`,
+	share: `<i class="ri-share-line"></i>`,
+	delete: `<i class="ri-delete-bin-line"></i>`
 };
 
 
@@ -397,10 +397,10 @@ function handleSaveSettings() {
 	chrome.storage.local.set({
 		settings
 	}, () => {
-		const originalText = saveSettingsBtn.textContent;
-		saveSettingsBtn.textContent = 'Saved!';
+		const originalHTML = saveSettingsBtn.innerHTML;
+		saveSettingsBtn.innerHTML = '<i class="ri-check-line"></i><span>Saved!</span>';
 		setTimeout(() => {
-			saveSettingsBtn.textContent = originalText;
+			saveSettingsBtn.innerHTML = originalHTML;
 		}, 1500);
 
 		applyTheme(settings.theme);
