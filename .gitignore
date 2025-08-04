@@ -30,3 +30,4 @@ scripts
 backup
 .aider*
 *.zip
+.git-credentials
