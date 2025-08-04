@@ -287,20 +287,23 @@ select:focus {
 	align-items: center;
 	justify-content: center;
 	gap: var(--spacing-sm);
-	width: 100%;
-	padding: var(--spacing-lg);
-	background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
-	color: white;
-	border: none;
-	border-radius: var(--radius-md);
+	/* width: 100%; */
+	padding: var(--spacing-sm) var(--spacing-lg);
+	background: rgba(114, 118, 139, 0.04);
+	color: var(--text-primary);
+	border: 1px solid var(--border-color);
+	border-radius: 9999px;
+	/* Fully rounded sides */
 	cursor: pointer;
-	font-weight: var(--font-weight-semibold);
+	font-weight: normal;
 	font-size: 14px;
 	transition: all 0.2s ease;
 	box-shadow: var(--shadow-sm);
 }
 
 .primary-button:hover {
+	background: rgba(114, 118, 139, 0.08);
+	/* Slightly darker on hover */
 	transform: translateY(-1px);
 	box-shadow: var(--shadow-md);
 }
@@ -877,10 +880,12 @@ input:focus+.toggle-slider {
 
 /* App Footer */
 .app-footer {
-	padding: var(--spacing-lg);
-	border-top: 1px solid var(--border-color);
 	background-color: var(--bg-secondary);
 	text-align: center;
+	padding: var(--spacing-sm);
+	text-align: center;
+	font-size: 12px;
+	color: var(--text-secondary);
 }
 
 .app-footer p {
@@ -1139,27 +1144,6 @@ select {
 	color: var(--text-primary);
 }
 
-.primary-button {
-	width: 100%;
-	padding: var(--spacing-sm);
-	background-color: var(--accent-color);
-	color: white;
-	border: none;
-	border-radius: var(--border-radius);
-	cursor: pointer;
-	font-weight: 500;
-	transition: background-color 0.2s;
-}
-
-.primary-button:hover {
-	background-color: var(--accent-hover);
-}
-
-.primary-button:focus {
-	outline: none;
-	box-shadow: 0 0 0 2px rgba(79, 109, 245, 0.3);
-}
-
 .summary-result-container {
 	/* margin-top: var(--spacing-lg); */
 	min-height: 100px;
@@ -1402,13 +1386,13 @@ input:checked+.toggle-slider:before {
 	background-color: var(--bg-secondary);
 }
 
-.app-footer {
+/* .app-footer {
 	padding: var(--spacing-sm);
 	border-top: 1px solid var(--border-color);
 	text-align: center;
 	font-size: 12px;
 	color: var(--text-secondary);
-}
+} */
 
 
 .history-actions {
