@@ -69,6 +69,7 @@ function initialize() {
 	loadHistoryData();
 	initSidepanelWordDefinition();
 	injectIcons();
+	loadCurrentPageInfo();
 }
 
 /**
@@ -1525,6 +1526,72 @@ function updateEmailPanel(emailContent) {
 
 	if (bodyTextarea) {
 		bodyTextarea.value = emailContent.body;
+	}
+}
+
+/**
+ * Load current page information and populate the page info card
+ */
+async function loadCurrentPageInfo() {
+	const pageInfoCard = document.getElementById('current-page-info');
+	const pageFavicon = document.getElementById('page-favicon');
+	const fallbackIcon = document.querySelector('.page-info-fallback-icon');
+	const pageTitle = document.getElementById('page-title');
+	const pageUrl = document.getElementById('page-url');
+	const pageDomain = document.getElementById('page-domain');
+	const pageStatus = document.getElementById('page-status');
+
+	if (!pageInfoCard) return;
+
+	try {
+		// Get current tab information
+		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+			if (!tabs[0]) {
+				updatePageInfo('No active tab', '', '', 'No tab found');
+				return;
+			}
+
+			const tab = tabs[0];
+			const url = new URL(tab.url);
+			const domain = url.hostname;
+			const title = tab.title || 'Untitled Page';
+
+			// Check if it's a special Chrome page
+			if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
+				updatePageInfo(title, tab.url, domain, 'Chrome internal page');
+				return;
+			}
+
+			// Try to get favicon
+			if (tab.favIconUrl && tab.favIconUrl !== '') {
+				pageFavicon.src = tab.favIconUrl;
+				pageFavicon.style.display = 'block';
+				fallbackIcon.style.display = 'none';
+
+				// Handle favicon load error
+				pageFavicon.onerror = () => {
+					pageFavicon.style.display = 'none';
+					fallbackIcon.style.display = 'flex';
+				};
+			} else {
+				pageFavicon.style.display = 'none';
+				fallbackIcon.style.display = 'flex';
+			}
+
+			// Update page information
+			updatePageInfo(title, tab.url, domain, 'Ready to summarize');
+		});
+
+	} catch (error) {
+		console.error('Error loading page info:', error);
+		updatePageInfo('Error loading page info', '', '', 'Error occurred');
+	}
+
+	function updatePageInfo(title, url, domain, status) {
+		if (pageTitle) pageTitle.textContent = title;
+		if (pageUrl) pageUrl.textContent = url;
+		if (pageDomain) pageDomain.textContent = domain;
+		if (pageStatus) pageStatus.textContent = status;
 	}
 }
 

@@ -31,6 +31,26 @@
 					<div class="controls-container">
 						<h2>Welcome to Smart Digest</h2>
 						<p>Your AI-powered summarization tool.</p>
+						<!-- add some basic info about the current page here, use favicon (if avail), title, etc-->
+
+						<div id="current-page-info" class="page-info-card">
+							<div class="page-info-header">
+								<img id="page-favicon" src="" alt="Page icon" class="page-favicon"
+									style="display: none;">
+								<div class="page-info-fallback-icon">
+									<i class="ri-global-line"></i>
+								</div>
+								<div class="page-details">
+									<h3 id="page-title" class="page-title">Loading page info...</h3>
+									<p id="page-url" class="page-url">...</p>
+								</div>
+							</div>
+							<div class="page-info-meta">
+								<span id="page-domain" class="page-domain"></span>
+								<span id="page-status" class="page-status">Ready to summarize</span>
+							</div>
+						</div>
+
 						<button id="summarize-btn" class="primary-button">
 							<i class="ri-magic-line"></i>
 							<span>Summarize Page</span>
@@ -40,463 +60,408 @@
 								<i class="ri-star-fill star-2" style="--rotate: 341deg;--delay: 0.8s;right: -8px;"></i>
 							</div>
 						</button>
-						<style>
-							.primary-button {
-								position: relative;
-								overflow: hidden;
-							}
-
-							.sparkle-effect {
-								position: absolute;
-								width: 100%;
-								height: 100%;
-								top: 0;
-								left: 0;
-								pointer-events: none;
-								opacity: 0;
-								transition: opacity 0.3s ease;
-							}
-
-							.primary-button:hover .sparkle-effect {
-								opacity: 1;
-							}
-
-							.sparkle-effect i {
-								position: absolute;
-								top: 75%;
-								right: -5px;
-								font-size: 0.75rem;
-								transform: translate(-50%, -50%) rotate(var(--rotate)) translateY(-100%);
-								color: transparent;
-								background: linear-gradient(135deg, #9b6dff, #4e6fff);
-								-webkit-background-clip: text;
-								background-clip: text;
-								animation: pulse 1.5s infinite ease-in-out;
-								animation-delay: var(--delay);
-								opacity: 0;
-							}
-
-							.primary-button:hover .sparkle-effect i {
-								opacity: 1;
-							}
-
-							@keyframes pulse {
-
-								0%,
-								100% {
-									transform: translate(-50%, -50%) rotate(var(--rotate)) translateY(-100%) scale(0.8);
-								}
-
-								50% {
-									transform: translate(-50%, -50%) rotate(var(--rotate)) translateY(-100%) scale(1.2);
-								}
-							}
-						</style>
 					</div>
-		</div>
 
+					<div class="summary-result-container">
+						<div id="loading-indicator" class="hidden">
+							<div class="spinner"></div>
+							<p>Generating summary...</p>
+						</div>
 
+						<div id="summary-content" class="hidden">
+							<div class="summary-header">
+								<h2 id="summary-title">
+									<i class="ri-file-text-line"></i>
+									Page Summary
+								</h2>
+								<div class="summary-actions">
+									<button id="copy-btn" title="Copy to clipboard">
+										<i class="ri-file-copy-line"></i>
+									</button>
+									<button id="speak-btn" title="Listen to summary">
+										<i class="ri-volume-up-line"></i>
+									</button>
+									<button id="share-btn" title="Share summary">
+										<i class="ri-share-line"></i>
+									</button>
+								</div>
+							</div>
+							<div id="summary-text"></div>
+							<div id="additional-analysis">
+								<div id="tone-bias" class="hidden">
+									<h3>Tone and Bias Analysis</h3>
+									<div class="analysis"></div>
+								</div>
+								<div id="highlight-vague-claims" class="hidden">
+									<h3>Highlight Vague Claims</h3>
+									<div class="analysis"></div>
+								</div>
+								<div id="counterpoints" class="hidden">
+									<h3>Counterpoints</h3>
+									<div class="analysis"></div>
+								</div>
+								<div id="sentiment-detection" class="hidden">
+									<h3>Sentiment Detection</h3>
+									<div class="analysis"></div>
+								</div>
+								<div id="intent-summary" class="hidden">
+									<h3>Intent Summary</h3>
+									<div class="analysis"></div>
+								</div>
+								<div id="fact-contrast" class="hidden">
+									<h3>Fact Contrast</h3>
+									<div class="analysis"></div>
+								</div>
+							</div>
+						</div>
 
-		<div class="summary-result-container">
-			<div id="loading-indicator" class="hidden">
-				<div class="spinner"></div>
-				<p>Generating summary...</p>
-			</div>
-
-			<div id="summary-content" class="hidden">
-				<div class="summary-header">
-					<h2 id="summary-title">
-						<i class="ri-file-text-line"></i>
-						Page Summary
-					</h2>
-					<div class="summary-actions">
-						<button id="copy-btn" title="Copy to clipboard">
-							<i class="ri-file-copy-line"></i>
-						</button>
-						<button id="speak-btn" title="Listen to summary">
-							<i class="ri-volume-up-line"></i>
-						</button>
-						<button id="share-btn" title="Share summary">
-							<i class="ri-share-line"></i>
-						</button>
-					</div>
-				</div>
-				<div id="summary-text"></div>
-				<div id="additional-analysis">
-					<div id="tone-bias" class="hidden">
-						<h3>Tone and Bias Analysis</h3>
-						<div class="analysis"></div>
-					</div>
-					<div id="highlight-vague-claims" class="hidden">
-						<h3>Highlight Vague Claims</h3>
-						<div class="analysis"></div>
-					</div>
-					<div id="counterpoints" class="hidden">
-						<h3>Counterpoints</h3>
-						<div class="analysis"></div>
-					</div>
-					<div id="sentiment-detection" class="hidden">
-						<h3>Sentiment Detection</h3>
-						<div class="analysis"></div>
-					</div>
-					<div id="intent-summary" class="hidden">
-						<h3>Intent Summary</h3>
-						<div class="analysis"></div>
-					</div>
-					<div id="fact-contrast" class="hidden">
-						<h3>Fact Contrast</h3>
-						<div class="analysis"></div>
-					</div>
-				</div>
-			</div>
-
-			<div id="error-message" class="hidden">
-				<div class="error-content">
-					<i class="ri-error-warning-line"></i>
-					<p>There was an error generating the summary. Please try again.</p>
-				</div>
-				<div class="error-actions">
-					<button id="retry-btn" class="secondary-button">
-						<i class="ri-refresh-line"></i>
-						Try Again
-					</button>
-					<button id="settings-btn" class="secondary-button" style="display: none;">
-						<i class="ri-settings-3-line"></i>
-						Go to Settings
-					</button>
-				</div>
-			</div>
-		</div>
-		</section>
-
-		<!-- History Tab -->
-		<section id="history-tab" class="tab-panel hidden">
-			<div class="search-container">
-				<div class="search-input-wrapper">
-					<i class="ri-search-line"></i>
-					<input type="text" id="history-search" placeholder="Search history..." />
-				</div>
-			</div>
-			<div class="history-actions">
-				<button id="clear-history-btn" class="secondary-button">
-					<i class="ri-delete-bin-line"></i>
-					Clear All
-				</button>
-			</div>
-			<div id="history-list">
-				<!-- History items will be inserted here dynamically -->
-				<div class="empty-state">
-					<i class="ri-history-line"></i>
-					<p>No summary history yet.</p>
-					<span class="empty-state-subtitle">Your summarized pages will appear here</span>
-				</div>
-			</div>
-		</section>
-
-		<!-- Settings Tab -->
-		<section id="settings-tab" class="tab-panel hidden">
-			<div class="settings-group">
-				<h3>
-					<i class="ri-palette-line"></i>
-					Appearance
-				</h3>
-				<div class="setting-item">
-					<label for="theme-select">Theme</label>
-					<select id="theme-select">
-						<option value="light">Light</option>
-						<option value="dark">Dark</option>
-						<option value="system">System Default</option>
-					</select>
-				</div>
-			</div>
-
-			<div class="settings-group">
-				<h3>
-					<i class="ri-settings-2-line"></i>
-					AI Settings
-				</h3>
-				<div class="setting-item">
-					<label for="format-select">
-						Output Format
-					</label>
-					<select id="format-select">
-						<option value="bullets">Bullet Points</option>
-						<option value="academic">Academic</option>
-						<option value="professional">Professional</option>
-						<option value="simplified">Simplified</option>
-					</select>
-					<p class="setting-description">
-						Select the format for AI-generated summaries. Options include:
-					<ul>
-						<li><strong>Bullet Points:</strong> Concise, easy-to-read summaries.</li>
-						<li><strong>Academic:</strong> Formal, structured summaries with citations.</li>
-						<li><strong>Professional:</strong> Business-oriented summaries with key insights.</li>
-						<li><strong>Simplified:</strong> Simplified language for broader accessibility.</li>
-					</ul>
-				</div>
-				<div class="setting-item">
-					<label for="length-select">
-						Output Length
-					</label>
-					<select id="length-select">
-						<option value="brief">Brief</option>
-						<option value="detailed">Detailed</option>
-					</select>
-					<p class="setting-description">
-						Select the length for AI-generated summaries. Options include:
-					<ul>
-						<li><strong>Brief:</strong> Brief summaries capturing key points.</li>
-						<li><strong>Detailed:</strong> Balanced summaries with moderate detail.</li>
-					</ul>
-				</div>
-			</div>
-
-			<div class="settings-group">
-				<h3>
-					<i class="ri-key-line"></i>
-					API Configuration
-				</h3>
-				<div class="setting-item">
-					<label for="api-key">OpenAI API Key</label>
-					<div class="input-wrapper">
-						<i class="ri-lock-line"></i>
-						<input type="password" id="api-key" placeholder="Enter your API key" />
-					</div>
-					<p class="setting-description">
-						Your API key is stored in your browser and used only for generating summaries.
-					</p>
-				</div>
-			</div>
-
-			<div class="settings-group">
-				<h3>
-					<i class="ri-toggle-line"></i>
-					Extension
-				</h3>
-				<div class="setting-item">
-					<div class="setting-toggle">
-						<label class="toggle-switch">
-							<input type="checkbox" id="enable-content-script" checked />
-							<span class="toggle-slider"></span>
-						</label>
-						<div class="setting-info">
-							<span class="setting-title">Enable extension on all pages</span>
+						<div id="error-message" class="hidden">
+							<div class="error-content">
+								<i class="ri-error-warning-line"></i>
+								<p>There was an error generating the summary. Please try again.</p>
+							</div>
+							<div class="error-actions">
+								<button id="retry-btn" class="secondary-button">
+									<i class="ri-refresh-line"></i>
+									Try Again
+								</button>
+								<button id="settings-btn" class="secondary-button" style="display: none;">
+									<i class="ri-settings-3-line"></i>
+									Go to Settings
+								</button>
+							</div>
 						</div>
 					</div>
-				</div>
-			</div>
+				</section>
 
-			<div class="settings-group">
-				<h3>
-					<i class="ri-brain-line"></i>
-					AI Feedback &amp; Impressions
-				</h3>
-				<div class="setting-item">
-					<div class="setting-toggle">
-						<label class="toggle-switch">
-							<input type="checkbox" id="enable-tone-bias-analysis" />
-							<span class="toggle-slider"></span>
-						</label>
-						<div class="setting-info">
-							<span class="setting-title">Offer tone and bias analysis of content</span>
+				<!-- History Tab -->
+				<section id="history-tab" class="tab-panel hidden">
+					<div class="search-container">
+						<div class="search-input-wrapper">
+							<i class="ri-search-line"></i>
+							<input type="text" id="history-search" placeholder="Search history..." />
 						</div>
 					</div>
-				</div>
-				<div class="setting-item">
-					<div class="setting-toggle">
-						<label class="toggle-switch">
-							<input type="checkbox" id="enable-highlight-vague-claims" />
-							<span class="toggle-slider"></span>
-						</label>
-						<div class="setting-info">
-							<span class="setting-title">Highlight unsubstantiated or vague claims</span>
+					<div class="history-actions">
+						<button id="clear-history-btn" class="secondary-button">
+							<i class="ri-delete-bin-line"></i>
+							Clear All
+						</button>
+					</div>
+					<div id="history-list">
+						<!-- History items will be inserted here dynamically -->
+						<div class="empty-state">
+							<i class="ri-history-line"></i>
+							<p>No summary history yet.</p>
+							<span class="empty-state-subtitle">Your summarized pages will appear here</span>
+						</div>
+					</div>
+				</section>
+
+				<!-- Settings Tab -->
+				<section id="settings-tab" class="tab-panel hidden">
+					<div class="settings-group">
+						<h3>
+							<i class="ri-palette-line"></i>
+							Appearance
+						</h3>
+						<div class="setting-item">
+							<label for="theme-select">Theme</label>
+							<select id="theme-select">
+								<option value="light">Light</option>
+								<option value="dark">Dark</option>
+								<option value="system">System Default</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="settings-group">
+						<h3>
+							<i class="ri-settings-2-line"></i>
+							AI Settings
+						</h3>
+						<div class="setting-item">
+							<label for="format-select">
+								Output Format
+							</label>
+							<select id="format-select">
+								<option value="bullets">Bullet Points</option>
+								<option value="academic">Academic</option>
+								<option value="professional">Professional</option>
+								<option value="simplified">Simplified</option>
+							</select>
 							<p class="setting-description">
-								Identifies questionable claims with detailed analysis and improvement
-								suggestions.
+								Select the format for AI-generated summaries. Options include:
+							<ul>
+								<li><strong>Bullet Points:</strong> Concise, easy-to-read summaries.</li>
+								<li><strong>Academic:</strong> Formal, structured summaries with citations.</li>
+								<li><strong>Professional:</strong> Business-oriented summaries with key insights.</li>
+								<li><strong>Simplified:</strong> Simplified language for broader accessibility.</li>
+							</ul>
+						</div>
+						<div class="setting-item">
+							<label for="length-select">
+								Output Length
+							</label>
+							<select id="length-select">
+								<option value="brief">Brief</option>
+								<option value="detailed">Detailed</option>
+							</select>
+							<p class="setting-description">
+								Select the length for AI-generated summaries. Options include:
+							<ul>
+								<li><strong>Brief:</strong> Brief summaries capturing key points.</li>
+								<li><strong>Detailed:</strong> Balanced summaries with moderate detail.</li>
+							</ul>
+						</div>
+					</div>
+
+					<div class="settings-group">
+						<h3>
+							<i class="ri-key-line"></i>
+							API Configuration
+						</h3>
+						<div class="setting-item">
+							<label for="api-key">OpenAI API Key</label>
+							<div class="input-wrapper">
+								<i class="ri-lock-line"></i>
+								<input type="password" id="api-key" placeholder="Enter your API key" />
+							</div>
+							<p class="setting-description">
+								Your API key is stored in your browser and used only for generating summaries.
 							</p>
 						</div>
 					</div>
-				</div>
-				<div class="setting-item">
-					<div class="setting-toggle">
-						<label class="toggle-switch">
-							<input type="checkbox" id="enable-counterpoints" />
-							<span class="toggle-slider"></span>
-						</label>
-						<div class="setting-info">
-							<span class="setting-title">Present counterpoints or alternative perspectives</span>
-						</div>
-					</div>
-				</div>
-				<div class="setting-item">
-					<div class="setting-toggle">
-						<label class="toggle-switch">
-							<input type="checkbox" id="enable-sentiment-detection" />
-							<span class="toggle-slider"></span>
-						</label>
-						<div class="setting-info">
-							<span class="setting-title">Detect sentiment toward mentioned entities</span>
-						</div>
-					</div>
-				</div>
-				<div class="setting-item">
-					<div class="setting-toggle">
-						<label class="toggle-switch">
-							<input type="checkbox" id="enable-intent-summary" />
-							<span class="toggle-slider"></span>
-						</label>
-						<div class="setting-info">
-							<span class="setting-title">Summarize intent of the page</span>
-						</div>
-					</div>
-				</div>
-				<div class="setting-item">
-					<div class="setting-toggle">
-						<label class="toggle-switch">
-							<input type="checkbox" id="enable-fact-contrast" />
-							<span class="toggle-slider"></span>
-						</label>
-						<div class="setting-info">
-							<span class="setting-title">Include contrast with known facts (opt-in)</span>
-						</div>
-					</div>
-				</div>
-			</div>
 
-			<button id="save-settings" class="primary-button">
-				<i class="ri-save-line"></i>
-				<span>Save Settings</span>
-			</button>
-		</section>
-		</main>
+					<div class="settings-group">
+						<h3>
+							<i class="ri-toggle-line"></i>
+							Extension
+						</h3>
+						<div class="setting-item">
+							<div class="setting-toggle">
+								<label class="toggle-switch">
+									<input type="checkbox" id="enable-content-script" checked />
+									<span class="toggle-slider"></span>
+								</label>
+								<div class="setting-info">
+									<span class="setting-title">Enable extension on all pages</span>
+								</div>
+							</div>
+						</div>
+					</div>
 
-		<div class="tab-navigation">
-			<button class="tab-button active" data-tab="summary" title="Summary">
-				<i class="ri-file-text-line"></i>
-			</button>
-			<button class="tab-button" data-tab="history" title="History">
-				<i class="ri-history-line"></i>
-			</button>
-			<button class="tab-button" data-tab="settings" title="Settings">
-				<i class="ri-settings-3-line"></i>
-			</button>
-		</div>
-	</div>
+					<div class="settings-group">
+						<h3>
+							<i class="ri-brain-line"></i>
+							AI Feedback &amp; Impressions
+						</h3>
+						<div class="setting-item">
+							<div class="setting-toggle">
+								<label class="toggle-switch">
+									<input type="checkbox" id="enable-tone-bias-analysis" />
+									<span class="toggle-slider"></span>
+								</label>
+								<div class="setting-info">
+									<span class="setting-title">Offer tone and bias analysis of content</span>
+								</div>
+							</div>
+						</div>
+						<div class="setting-item">
+							<div class="setting-toggle">
+								<label class="toggle-switch">
+									<input type="checkbox" id="enable-highlight-vague-claims" />
+									<span class="toggle-slider"></span>
+								</label>
+								<div class="setting-info">
+									<span class="setting-title">Highlight unsubstantiated or vague claims</span>
+									<p class="setting-description">
+										Identifies questionable claims with detailed analysis and improvement
+										suggestions.
+									</p>
+								</div>
+							</div>
+						</div>
+						<div class="setting-item">
+							<div class="setting-toggle">
+								<label class="toggle-switch">
+									<input type="checkbox" id="enable-counterpoints" />
+									<span class="toggle-slider"></span>
+								</label>
+								<div class="setting-info">
+									<span class="setting-title">Present counterpoints or alternative perspectives</span>
+								</div>
+							</div>
+						</div>
+						<div class="setting-item">
+							<div class="setting-toggle">
+								<label class="toggle-switch">
+									<input type="checkbox" id="enable-sentiment-detection" />
+									<span class="toggle-slider"></span>
+								</label>
+								<div class="setting-info">
+									<span class="setting-title">Detect sentiment toward mentioned entities</span>
+								</div>
+							</div>
+						</div>
+						<div class="setting-item">
+							<div class="setting-toggle">
+								<label class="toggle-switch">
+									<input type="checkbox" id="enable-intent-summary" />
+									<span class="toggle-slider"></span>
+								</label>
+								<div class="setting-info">
+									<span class="setting-title">Summarize intent of the page</span>
+								</div>
+							</div>
+						</div>
+						<div class="setting-item">
+							<div class="setting-toggle">
+								<label class="toggle-switch">
+									<input type="checkbox" id="enable-fact-contrast" />
+									<span class="toggle-slider"></span>
+								</label>
+								<div class="setting-info">
+									<span class="setting-title">Include contrast with known facts (opt-in)</span>
+								</div>
+							</div>
+						</div>
+					</div>
 
-	<!-- Share Modal -->
-	<div id="share-modal" class="modal-overlay hidden">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h3>
-					<i class="ri-share-line"></i>
-					Share Summary
-				</h3>
-				<button id="close-share-modal" class="close-button">
-					<i class="ri-close-line"></i>
+					<button id="save-settings" class="primary-button">
+						<i class="ri-save-line"></i>
+						<span>Save Settings</span>
+					</button>
+				</section>
+			</main>
+
+			<div class="tab-navigation">
+				<button class="tab-button active" data-tab="summary" title="Summary">
+					<i class="ri-file-text-line"></i>
+				</button>
+				<button class="tab-button" data-tab="history" title="History">
+					<i class="ri-history-line"></i>
+				</button>
+				<button class="tab-button" data-tab="settings" title="Settings">
+					<i class="ri-settings-3-line"></i>
 				</button>
 			</div>
-			<div class="modal-body">
-				<div class="share-tabs">
-					<button class="share-tab-button active" data-platform="twitter">
-						<i class="ri-twitter-x-line"></i>
-						Twitter/X
-					</button>
-					<button class="share-tab-button" data-platform="linkedin">
-						<i class="ri-linkedin-line"></i>
-						LinkedIn
-					</button>
-					<button class="share-tab-button" data-platform="facebook">
-						<i class="ri-facebook-line"></i>
-						Facebook
-					</button>
-					<button class="share-tab-button" data-platform="email">
-						<i class="ri-mail-line"></i>
-						Email
-					</button>
-					<button class="share-tab-button" data-platform="general">
-						<i class="ri-file-text-line"></i>
-						General
+		</div>
+
+		<!-- Share Modal -->
+		<div id="share-modal" class="modal-overlay hidden">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3>
+						<i class="ri-share-line"></i>
+						Share Summary
+					</h3>
+					<button id="close-share-modal" class="close-button">
+						<i class="ri-close-line"></i>
 					</button>
 				</div>
-				<div class="share-content">
-					<div id="twitter-share" class="share-panel active">
-						<div class="platform-info">
-							<p><strong>Twitter/X</strong> - Optimized for ~200 characters</p>
-						</div>
-						<textarea id="twitter-content" readonly></textarea>
-						<div class="share-actions">
-							<button class="copy-share-btn" data-platform="twitter">
-								<i class="ri-file-copy-line"></i>
-								Copy for Twitter/X
-							</button>
-							<span class="char-count" id="twitter-char-count">0/200</span>
-						</div>
+				<div class="modal-body">
+					<div class="share-tabs">
+						<button class="share-tab-button active" data-platform="twitter">
+							<i class="ri-twitter-x-line"></i>
+							Twitter/X
+						</button>
+						<button class="share-tab-button" data-platform="linkedin">
+							<i class="ri-linkedin-line"></i>
+							LinkedIn
+						</button>
+						<button class="share-tab-button" data-platform="facebook">
+							<i class="ri-facebook-line"></i>
+							Facebook
+						</button>
+						<button class="share-tab-button" data-platform="email">
+							<i class="ri-mail-line"></i>
+							Email
+						</button>
+						<button class="share-tab-button" data-platform="general">
+							<i class="ri-file-text-line"></i>
+							General
+						</button>
 					</div>
-					<div id="linkedin-share" class="share-panel hidden">
-						<div class="platform-info">
-							<p><strong>LinkedIn</strong> - Professional format with emojis</p>
+					<div class="share-content">
+						<div id="twitter-share" class="share-panel active">
+							<div class="platform-info">
+								<p><strong>Twitter/X</strong> - Optimized for ~200 characters</p>
+							</div>
+							<textarea id="twitter-content" readonly></textarea>
+							<div class="share-actions">
+								<button class="copy-share-btn" data-platform="twitter">
+									<i class="ri-file-copy-line"></i>
+									Copy for Twitter/X
+								</button>
+								<span class="char-count" id="twitter-char-count">0/200</span>
+							</div>
 						</div>
-						<textarea id="linkedin-content" readonly></textarea>
-						<div class="share-actions">
-							<button class="copy-share-btn" data-platform="linkedin">
-								<i class="ri-file-copy-line"></i>
-								Copy for LinkedIn
-							</button>
-							<span class="char-count" id="linkedin-char-count">0/3000</span>
+						<div id="linkedin-share" class="share-panel hidden">
+							<div class="platform-info">
+								<p><strong>LinkedIn</strong> - Professional format with emojis</p>
+							</div>
+							<textarea id="linkedin-content" readonly></textarea>
+							<div class="share-actions">
+								<button class="copy-share-btn" data-platform="linkedin">
+									<i class="ri-file-copy-line"></i>
+									Copy for LinkedIn
+								</button>
+								<span class="char-count" id="linkedin-char-count">0/3000</span>
+							</div>
 						</div>
-					</div>
-					<div id="facebook-share" class="share-panel hidden">
-						<div class="platform-info">
-							<p><strong>Facebook</strong> - Casual and engaging format</p>
+						<div id="facebook-share" class="share-panel hidden">
+							<div class="platform-info">
+								<p><strong>Facebook</strong> - Casual and engaging format</p>
+							</div>
+							<textarea id="facebook-content" readonly></textarea>
+							<div class="share-actions">
+								<button class="copy-share-btn" data-platform="facebook">
+									<i class="ri-file-copy-line"></i>
+									Copy for Facebook
+								</button>
+								<span class="char-count" id="facebook-char-count">0 characters</span>
+							</div>
 						</div>
-						<textarea id="facebook-content" readonly></textarea>
-						<div class="share-actions">
-							<button class="copy-share-btn" data-platform="facebook">
-								<i class="ri-file-copy-line"></i>
-								Copy for Facebook
-							</button>
-							<span class="char-count" id="facebook-char-count">0 characters</span>
+						<div id="email-share" class="share-panel hidden">
+							<div class="platform-info">
+								<p><strong>Email</strong> - Complete summary with metadata</p>
+							</div>
+							<div class="email-fields">
+								<label for="email-subject">Subject Line:</label>
+								<input type="text" id="email-subject" readonly />
+								<label for="email-body">Email Body:</label>
+								<textarea id="email-content" readonly></textarea>
+							</div>
+							<div class="share-actions">
+								<button class="copy-share-btn" data-platform="email">
+									<i class="ri-file-copy-line"></i>
+									Copy Email Content
+								</button>
+							</div>
 						</div>
-					</div>
-					<div id="email-share" class="share-panel hidden">
-						<div class="platform-info">
-							<p><strong>Email</strong> - Complete summary with metadata</p>
-						</div>
-						<div class="email-fields">
-							<label for="email-subject">Subject Line:</label>
-							<input type="text" id="email-subject" readonly />
-							<label for="email-body">Email Body:</label>
-							<textarea id="email-content" readonly></textarea>
-						</div>
-						<div class="share-actions">
-							<button class="copy-share-btn" data-platform="email">
-								<i class="ri-file-copy-line"></i>
-								Copy Email Content
-							</button>
-						</div>
-					</div>
-					<div id="general-share" class="share-panel hidden">
-						<div class="platform-info">
-							<p><strong>General</strong> - Clean format for any platform</p>
-						</div>
-						<textarea id="general-content" readonly></textarea>
-						<div class="share-actions">
-							<button class="copy-share-btn" data-platform="general">
-								<i class="ri-file-copy-line"></i>
-								Copy General Format
-							</button>
+						<div id="general-share" class="share-panel hidden">
+							<div class="platform-info">
+								<p><strong>General</strong> - Clean format for any platform</p>
+							</div>
+							<textarea id="general-content" readonly></textarea>
+							<div class="share-actions">
+								<button class="copy-share-btn" data-platform="general">
+									<i class="ri-file-copy-line"></i>
+									Copy General Format
+								</button>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 
-	<footer class="app-footer">
-		<p>Smart Digest v1.0.1</p>
-	</footer>
+		<footer class="app-footer">
+			<p>Smart Digest v1.0.1</p>
+		</footer>
 
-	<script type="module" src="js/main.js"></script>
+		<script type="module" src="js/main.js"></script>
 </body>
 
 </html>
