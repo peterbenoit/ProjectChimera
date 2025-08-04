@@ -28,7 +28,7 @@
 				<!-- Summary Tab -->
 				<section id="summary-tab" class="tab-panel active">
 					<div class="controls-container">
-						<div class="control-group">
+						<!-- <div class="control-group" >
 							<div class="format-controls">
 								<label for="format-select">
 									<i class="ri-ai-generate-text"></i>
@@ -52,7 +52,7 @@
 									<option value="detailed">Detailed</option>
 								</select>
 							</div>
-						</div>
+						</div> -->
 						<button id="summarize-btn" class="primary-button">
 							<i class="ri-magic-line"></i>
 							<span>Summarize Page</span>
@@ -176,6 +176,47 @@
 
 					<div class="settings-group">
 						<h3>
+							<i class="ri-settings-2-line"></i>
+							AI Settings
+						</h3>
+						<div class="setting-item">
+							<label for="format-select">
+								Output Format
+							</label>
+							<select id="format-select">
+								<option value="bullets">Bullet Points</option>
+								<option value="academic">Academic</option>
+								<option value="professional">Professional</option>
+								<option value="simplified">Simplified</option>
+							</select>
+							<p class="setting-description">
+								Select the format for AI-generated summaries. Options include:
+							<ul>
+								<li><strong>Bullet Points:</strong> Concise, easy-to-read summaries.</li>
+								<li><strong>Academic:</strong> Formal, structured summaries with citations.</li>
+								<li><strong>Professional:</strong> Business-oriented summaries with key insights.</li>
+								<li><strong>Simplified:</strong> Simplified language for broader accessibility.</li>
+							</ul>
+						</div>
+						<div class="setting-item">
+							<label for="length-select">
+								Output Length
+							</label>
+							<select id="length-select">
+								<option value="brief">Brief</option>
+								<option value="detailed">Detailed</option>
+							</select>
+							<p class="setting-description">
+								Select the length for AI-generated summaries. Options include:
+							<ul>
+								<li><strong>Brief:</strong> Brief summaries capturing key points.</li>
+								<li><strong>Detailed:</strong> Balanced summaries with moderate detail.</li>
+							</ul>
+						</div>
+					</div>
+
+					<div class="settings-group">
+						<h3>
 							<i class="ri-key-line"></i>
 							API Configuration
 						</h3>
@@ -212,7 +253,7 @@
 					<div class="settings-group">
 						<h3>
 							<i class="ri-brain-line"></i>
-							AI Feedback & Impressions
+							AI Feedback &amp; Impressions
 						</h3>
 						<div class="setting-item">
 							<div class="setting-toggle">
