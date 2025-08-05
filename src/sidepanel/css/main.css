@@ -15,6 +15,9 @@
 	--success-color: #10b981;
 	--warning-color: #f59e0b;
 
+	--border-radius: 8px;
+	--border-radius-full: 9999px;
+
 	/* Spacing System */
 	--spacing-xs: 4px;
 	--spacing-sm: 8px;
@@ -429,6 +432,9 @@ button.blue:hover {
 	justify-content: center;
 	padding: var(--spacing-3xl);
 	color: var(--text-secondary);
+	position: absolute;
+	top: 33%;
+	left: 25%;
 }
 
 .spinner {
@@ -723,6 +729,7 @@ button.blue:hover {
 	letter-spacing: 0.5px;
 	transition: all 0.3s ease;
 	padding-right: 45px;
+	padding-left: 30px;
 	/* Make room for toggle button */
 }
 
@@ -735,8 +742,8 @@ button.blue:hover {
 /* Input toggle button for password visibility */
 .input-toggle-btn {
 	position: absolute;
-	right: var(--spacing-sm);
-	top: 50%;
+	right: var(--spacing-3xl);
+	top: 25%;
 	transform: translateY(-50%);
 	background: none;
 	border: none;
@@ -1421,13 +1428,13 @@ select {
 	color: var(--accent-color);
 }
 
-#loading-indicator {
+/* #loading-indicator {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	padding: var(--spacing-xl);
-}
+} */
 
 #loading-indicator.hidden {
 	display: none;
@@ -1538,6 +1545,7 @@ input:checked+.toggle-slider:before {
 .search-container input {
 	width: 100%;
 	padding: 8px 12px;
+	padding-left: 30px;
 	border: 1px solid var(--border-color);
 	border-radius: var(--border-radius);
 }
@@ -2411,4 +2419,8 @@ input:checked+.toggle-slider:before {
 	50% {
 		transform: translate(-50%, -50%) rotate(var(--rotate)) translateY(-100%) scale(1.2);
 	}
+}
+
+.danger {
+	color: var(--error-color) !important;
 }

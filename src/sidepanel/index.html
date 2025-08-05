@@ -25,10 +25,9 @@
 
 		<div class="main-layout">
 			<main class="tab-content">
-				<!-- Summary Tab -->
-				<section id="summary-tab" class="tab-panel active">
-					<!-- change this class to summary-welcome-container -->
-					<div class="controls-container">
+				<!-- Welcome Tab -->
+				<section id="welcome-tab" class="tab-panel active">
+					<div class="controls-container welcome-panel">
 						<h2>Welcome to Smart Digest</h2>
 						<p>Your AI-powered summarization tool.</p>
 						<!-- add some basic info about the current page here, use favicon (if avail), title, etc-->
@@ -62,7 +61,9 @@
 							</div>
 						</button>
 					</div>
-
+				</section>
+				<!-- Summary Tab -->
+				<section id="summary-tab" class="tab-panel hidden">
 					<div class="summary-result-container">
 						<div id="loading-indicator" class="hidden">
 							<div class="spinner"></div>
@@ -144,7 +145,7 @@
 						</div>
 					</div>
 					<div class="history-actions">
-						<button id="clear-history-btn" class="secondary-button">
+						<button id="clear-history-btn" class="secondary-button danger">
 							<i class="ri-delete-bin-line"></i>
 							Clear All
 						</button>
@@ -284,7 +285,7 @@
 								</div>
 							</div>
 							<p class="setting-description">
-								Your API key is stored securely in your browser and used only for generating summaries.
+								Your API key is stored securely and used only for generating summaries.
 							</p>
 						</div>
 					</div>

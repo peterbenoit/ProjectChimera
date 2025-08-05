@@ -226,6 +226,9 @@ function setupEventListeners() {
  */
 async function handleSummarizeClick() {
 	try {
+		// Switch to summary tab when summarization starts
+		switchToTab('summary');
+
 		hideError();
 
 		const format = formatSelect.value;
@@ -258,6 +261,8 @@ async function handleSummarizeClick() {
 
 			if (!shouldContinue) {
 				showLoading(false);
+				// Switch back to welcome tab if user cancels
+				switchToTab('welcome');
 				return; // Exit without error
 			}
 		}
@@ -1023,7 +1028,7 @@ function createHistoryItemElement(item, index) {
 			<h3 class="history-item-title">${item.metadata.title || 'Untitled Page'}</h3>
 			<div class="history-item-actions">
 				<button class="history-copy-btn" title="Copy Summary">${ICONS.copy}</button>
-				<button class="history-delete-btn" title="Delete Summary">${ICONS.delete}</button>
+				<button class="history-delete-btn danger" title="Delete Summary">${ICONS.delete}</button>
 			</div>
 		</div>
 		<div class="history-item-meta">
@@ -1144,8 +1149,8 @@ function showCustomConfirmation(message, onConfirm, onCancel = () => { }) {
 	dialog.innerHTML = `
     <p>${message}</p>
     <div class="confirmation-buttons">
-      <button class="secondary-button cancel-btn">Cancel</button>
-      <button class="primary-button blue confirm-btn">Confirm</button>
+      <button class="primary-button cancel-btn">Cancel</button>
+      <button class="secondary-button danger confirm-btn">Confirm</button>
     </div>
   `;
 
