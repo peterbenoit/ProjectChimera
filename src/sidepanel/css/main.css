@@ -662,13 +662,14 @@ button.blue:hover {
 /* API Key Status Display */
 .api-key-status {
 	display: flex;
-	align-items: center;
+	/* align-items: center; */
 	gap: var(--spacing-sm);
 	padding: var(--spacing-md);
 	background-color: var(--bg-secondary);
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-md);
 	margin-bottom: var(--spacing-md);
+	flex-direction: column;
 }
 
 .api-key-status i {
@@ -692,7 +693,7 @@ button.blue:hover {
 	background-color: var(--bg-tertiary);
 	padding: 2px 6px;
 	border-radius: var(--radius-sm);
-	margin-left: auto;
+	/* margin-left: auto; */
 }
 
 /* API Key Actions */
