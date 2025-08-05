@@ -352,7 +352,7 @@ function requestPageContent() {
 			}
 
 			const tabUrl = tabs[0].url;
-			if (tabUrl.startsWith('chrome://') || tabUrl.startsWith('chrome-extension://')) {
+			if (tabUrl.startsWith('chrome://') || tabUrl.startsWith('chrome-extension://') || tabUrl.startsWith('brave://') || tabUrl.startsWith('brave-extension://')) {
 				reject(new Error('Summarization is not available on Chrome internal pages.'));
 				return;
 			}
@@ -1142,7 +1142,7 @@ function showCustomConfirmation(message, onConfirm, onCancel = () => { }) {
     <p>${message}</p>
     <div class="confirmation-buttons">
       <button class="secondary-button cancel-btn">Cancel</button>
-      <button class="primary-button confirm-btn">Confirm</button>
+      <button class="primary-button blue confirm-btn">Confirm</button>
     </div>
   `;
 
@@ -1617,8 +1617,22 @@ async function loadCurrentPageInfo() {
 			let domain = '';
 			let status = 'Ready to summarize';
 
+			console.log('Current tab:', tab);
+			console.log('Tab URL:', tab.url);
+			console.log('Tab Title:', title);
+
+			// add a check for empty or undefined tab.url
+			if (!tab.url || tab.url === '') {
+				updatePageInfo('No active tab', '', '', 'No URL found');
+				return;
+			}
+
 			// Check if it's a special Chrome page or extension page
-			if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('moz-extension://') || tab.url.startsWith('edge-extension://')) {
+			if (tab.url.startsWith('chrome://') ||
+				tab.url.startsWith('chrome-extension://') ||
+				tab.url.startsWith('moz-extension://') ||
+				tab.url.startsWith('edge-extension://') ||
+				tab.url.startsWith('brave-extension://')) {
 				// Handle special browser pages
 				if (tab.url.startsWith('chrome://')) {
 					domain = 'Chrome';
