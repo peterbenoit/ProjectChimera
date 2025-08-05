@@ -29,8 +29,29 @@ const summaryContent = document.getElementById('summary-content');
 const summaryText = document.getElementById('summary-text');
 const errorMessage = document.getElementById('error-message');
 const saveSettingsBtn = document.getElementById('save-settings');
-const apiKeyInput = document.getElementById('api-key');
 const themeSelect = document.getElementById('theme-select');
+
+// API Key Manager Elements
+const apiKeyManager = document.getElementById('api-key-manager');
+const apiKeyEmptyState = document.getElementById('api-key-empty-state');
+const apiKeyConfiguredState = document.getElementById('api-key-configured-state');
+const apiKeyInputState = document.getElementById('api-key-input-state');
+const apiKeyPreview = document.getElementById('api-key-preview');
+const apiKeyInput = document.getElementById('api-key-input');
+const apiKeyInputLabel = document.getElementById('api-key-input-label');
+const saveApiKeyText = document.getElementById('save-api-key-text');
+
+// API Key Action Buttons
+const addApiKeyBtn = document.getElementById('add-api-key-btn');
+const editApiKeyBtn = document.getElementById('edit-api-key-btn');
+const deleteApiKeyBtn = document.getElementById('delete-api-key-btn');
+const saveApiKeyBtn = document.getElementById('save-api-key-btn');
+const cancelApiKeyBtn = document.getElementById('cancel-api-key-btn');
+const toggleApiKeyVisibilityBtn = document.getElementById('toggle-api-key-visibility');
+
+// API Key Validation
+const apiKeyValidation = document.getElementById('api-key-validation');
+const apiKeyValidationMessage = document.getElementById('api-key-validation-message');
 
 // Add references to the new analysis divs
 const toneBiasDiv = document.getElementById('tone-bias');
@@ -195,6 +216,9 @@ function setupEventListeners() {
 
 	// Share modal functionality
 	setupShareModal();
+
+	// API Key Manager functionality
+	setupApiKeyManager();
 }
 
 /**
@@ -1667,6 +1691,273 @@ async function loadCurrentPageInfo() {
 		if (pageUrl) pageUrl.textContent = url;
 		if (pageDomain) pageDomain.textContent = domain;
 		if (pageStatus) pageStatus.textContent = status;
+	}
+}
+
+/**
+ * Set up API Key Manager functionality
+ */
+function setupApiKeyManager() {
+	let currentApiKey = '';
+	let isEditMode = false;
+
+	// Load initial state
+	loadApiKeyState();
+
+	// Add API Key button
+	if (addApiKeyBtn) {
+		addApiKeyBtn.addEventListener('click', () => {
+			showApiKeyInputState('add');
+		});
+	}
+
+	// Edit API Key button
+	if (editApiKeyBtn) {
+		editApiKeyBtn.addEventListener('click', () => {
+			showApiKeyInputState('edit');
+		});
+	}
+
+	// Delete API Key button
+	if (deleteApiKeyBtn) {
+		deleteApiKeyBtn.addEventListener('click', () => {
+			showCustomConfirmation('Are you sure you want to delete your API key?', () => {
+				deleteApiKey();
+			});
+		});
+	}
+
+	// Save API Key button
+	if (saveApiKeyBtn) {
+		saveApiKeyBtn.addEventListener('click', () => {
+			saveApiKey();
+		});
+	}
+
+	// Cancel API Key button
+	if (cancelApiKeyBtn) {
+		cancelApiKeyBtn.addEventListener('click', () => {
+			cancelApiKeyInput();
+		});
+	}
+
+	// Toggle password visibility
+	if (toggleApiKeyVisibilityBtn) {
+		toggleApiKeyVisibilityBtn.addEventListener('click', () => {
+			togglePasswordVisibility();
+		});
+	}
+
+	// API Key input validation
+	if (apiKeyInput) {
+		apiKeyInput.addEventListener('input', () => {
+			validateApiKeyInput();
+		});
+
+		apiKeyInput.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				saveApiKey();
+			} else if (e.key === 'Escape') {
+				e.preventDefault();
+				cancelApiKeyInput();
+			}
+		});
+	}
+
+	/**
+	 * Load and display current API key state
+	 */
+	function loadApiKeyState() {
+		chrome.storage.local.get(['settings'], (data) => {
+			const settings = data.settings || {};
+			currentApiKey = settings.apiKey || '';
+
+			if (currentApiKey) {
+				showConfiguredState();
+			} else {
+				showEmptyState();
+			}
+		});
+	}
+
+	/**
+	 * Show empty state (no API key configured)
+	 */
+	function showEmptyState() {
+		apiKeyEmptyState.classList.remove('hidden');
+		apiKeyConfiguredState.classList.add('hidden');
+		apiKeyInputState.classList.add('hidden');
+	}
+
+	/**
+	 * Show configured state (API key exists)
+	 */
+	function showConfiguredState() {
+		apiKeyEmptyState.classList.add('hidden');
+		apiKeyConfiguredState.classList.remove('hidden');
+		apiKeyInputState.classList.add('hidden');
+
+		// Update preview with masked key
+		if (apiKeyPreview && currentApiKey) {
+			const maskedKey = currentApiKey.length > 6 ?
+				`${currentApiKey.substring(0, 3)}${'*'.repeat(Math.min(20, currentApiKey.length - 6))}${currentApiKey.substring(currentApiKey.length - 3)}` :
+				'*'.repeat(currentApiKey.length);
+			apiKeyPreview.textContent = maskedKey;
+		}
+	}
+
+	/**
+	 * Show input state for adding or editing API key
+	 * @param {string} mode - 'add' or 'edit'
+	 */
+	function showApiKeyInputState(mode) {
+		isEditMode = mode === 'edit';
+
+		apiKeyEmptyState.classList.add('hidden');
+		apiKeyConfiguredState.classList.add('hidden');
+		apiKeyInputState.classList.remove('hidden');
+
+		// Update UI based on mode
+		if (isEditMode) {
+			apiKeyInputLabel.textContent = 'Enter your new OpenAI API Key';
+			saveApiKeyText.textContent = 'Update';
+		} else {
+			apiKeyInputLabel.textContent = 'Enter your OpenAI API Key';
+			saveApiKeyText.textContent = 'Save';
+		}
+
+		// Clear input and focus
+		apiKeyInput.value = '';
+		apiKeyInput.type = 'password';
+		toggleApiKeyVisibilityBtn.querySelector('i').className = 'ri-eye-line';
+		hideValidationMessage();
+		apiKeyInput.focus();
+	}
+
+	/**
+	 * Save the API key
+	 */
+	function saveApiKey() {
+		const newApiKey = apiKeyInput.value.trim();
+
+		if (!newApiKey) {
+			showValidationMessage('Please enter an API key');
+			return;
+		}
+
+		if (!isValidApiKey(newApiKey)) {
+			showValidationMessage('Please enter a valid OpenAI API key (should start with "sk-")');
+			return;
+		}
+
+		// Save to storage
+		chrome.storage.local.get(['settings'], (data) => {
+			const settings = data.settings || {};
+			settings.apiKey = newApiKey;
+
+			chrome.storage.local.set({ settings }, () => {
+				currentApiKey = newApiKey;
+				showConfiguredState();
+
+				// Show success feedback
+				const originalText = saveApiKeyBtn.innerHTML;
+				saveApiKeyBtn.innerHTML = '<i class="ri-check-line"></i><span>Saved!</span>';
+				setTimeout(() => {
+					saveApiKeyBtn.innerHTML = originalText;
+				}, 1500);
+			});
+		});
+	}
+
+	/**
+	 * Delete the API key
+	 */
+	function deleteApiKey() {
+		chrome.storage.local.get(['settings'], (data) => {
+			const settings = data.settings || {};
+			delete settings.apiKey;
+
+			chrome.storage.local.set({ settings }, () => {
+				currentApiKey = '';
+				showEmptyState();
+			});
+		});
+	}
+
+	/**
+	 * Cancel API key input and return to previous state
+	 */
+	function cancelApiKeyInput() {
+		if (currentApiKey) {
+			showConfiguredState();
+		} else {
+			showEmptyState();
+		}
+	}
+
+	/**
+	 * Toggle password visibility
+	 */
+	function togglePasswordVisibility() {
+		const icon = toggleApiKeyVisibilityBtn.querySelector('i');
+
+		if (apiKeyInput.type === 'password') {
+			apiKeyInput.type = 'text';
+			icon.className = 'ri-eye-off-line';
+		} else {
+			apiKeyInput.type = 'password';
+			icon.className = 'ri-eye-line';
+		}
+	}
+
+	/**
+	 * Validate API key input and show visual feedback
+	 */
+	function validateApiKeyInput() {
+		const value = apiKeyInput.value.trim();
+
+		// Remove all validation classes
+		apiKeyInput.classList.remove('valid', 'partial', 'invalid');
+		hideValidationMessage();
+
+		if (value.length === 0) {
+			return;
+		}
+
+		if (isValidApiKey(value)) {
+			apiKeyInput.classList.add('valid');
+		} else if (value.startsWith('sk-') && value.length > 10) {
+			apiKeyInput.classList.add('partial');
+		} else {
+			apiKeyInput.classList.add('invalid');
+		}
+	}
+
+	/**
+	 * Check if API key format is valid
+	 * @param {string} key - The API key to validate
+	 * @returns {boolean} - Whether the key format is valid
+	 */
+	function isValidApiKey(key) {
+		// OpenAI API keys start with 'sk-' and are typically 51 characters long
+		return key.startsWith('sk-') && key.length >= 20;
+	}
+
+	/**
+	 * Show validation error message
+	 * @param {string} message - The error message to show
+	 */
+	function showValidationMessage(message) {
+		apiKeyValidationMessage.textContent = message;
+		apiKeyValidation.classList.remove('hidden');
+	}
+
+	/**
+	 * Hide validation error message
+	 */
+	function hideValidationMessage() {
+		apiKeyValidation.classList.add('hidden');
 	}
 }
 

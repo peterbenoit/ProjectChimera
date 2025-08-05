@@ -222,13 +222,68 @@
 							API Configuration
 						</h3>
 						<div class="setting-item">
-							<label for="api-key">OpenAI API Key</label>
-							<div class="input-wrapper">
-								<i class="ri-lock-line"></i>
-								<input type="password" id="api-key" placeholder="Enter your API key" />
+							<div id="api-key-manager">
+								<!-- No API Key State -->
+								<div id="api-key-empty-state" class="api-key-state">
+									<div class="api-key-status">
+										<i class="ri-key-line"></i>
+										<span>No API key configured</span>
+									</div>
+									<button id="add-api-key-btn" class="secondary-button">
+										<i class="ri-add-line"></i>
+										Add API Key
+									</button>
+								</div>
+
+								<!-- API Key Configured State -->
+								<div id="api-key-configured-state" class="api-key-state hidden">
+									<div class="api-key-status">
+										<i class="ri-shield-check-line"></i>
+										<span>API key configured</span>
+										<span class="api-key-preview" id="api-key-preview"></span>
+									</div>
+									<div class="api-key-actions">
+										<button id="edit-api-key-btn" class="secondary-button">
+											<i class="ri-edit-line"></i>
+											Edit
+										</button>
+										<button id="delete-api-key-btn" class="secondary-button danger">
+											<i class="ri-delete-bin-line"></i>
+											Delete
+										</button>
+									</div>
+								</div>
+
+								<!-- API Key Input State -->
+								<div id="api-key-input-state" class="api-key-state hidden">
+									<label for="api-key-input">
+										<span id="api-key-input-label">Enter your OpenAI API Key</span>
+									</label>
+									<div class="input-wrapper">
+										<i class="ri-lock-line"></i>
+										<input type="password" id="api-key-input" placeholder="sk-..." />
+										<button type="button" id="toggle-api-key-visibility" class="input-toggle-btn">
+											<i class="ri-eye-line"></i>
+										</button>
+									</div>
+									<div class="api-key-input-actions">
+										<button id="cancel-api-key-btn" class="secondary-button">
+											<i class="ri-close-line"></i>
+											Cancel
+										</button>
+										<button id="save-api-key-btn" class="primary-button">
+											<i class="ri-save-line"></i>
+											<span id="save-api-key-text">Save</span>
+										</button>
+									</div>
+									<div id="api-key-validation" class="api-key-validation hidden">
+										<i class="ri-error-warning-line"></i>
+										<span id="api-key-validation-message"></span>
+									</div>
+								</div>
 							</div>
 							<p class="setting-description">
-								Your API key is stored in your browser and used only for generating summaries.
+								Your API key is stored securely in your browser and used only for generating summaries.
 							</p>
 						</div>
 					</div>

@@ -619,36 +619,182 @@ select:focus {
 	box-shadow: 0 0 0 3px var(--accent-light);
 }
 
-/* API Key specific styling */
-#api-key {
+/* API Key Manager Styling */
+#api-key-manager {
+	margin-bottom: var(--spacing-md);
+}
+
+.api-key-state {
+	display: none;
+}
+
+.api-key-state:not(.hidden) {
+	display: block;
+}
+
+/* API Key Status Display */
+.api-key-status {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-sm);
+	padding: var(--spacing-md);
+	background-color: var(--bg-secondary);
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-md);
+	margin-bottom: var(--spacing-md);
+}
+
+.api-key-status i {
+	font-size: 16px;
+	color: var(--text-secondary);
+}
+
+#api-key-configured-state .api-key-status i {
+	color: var(--success-color);
+}
+
+.api-key-status span:first-of-type {
+	font-weight: var(--font-weight-medium);
+	color: var(--text-primary);
+}
+
+.api-key-preview {
+	font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+	font-size: 12px;
+	color: var(--text-muted);
+	background-color: var(--bg-tertiary);
+	padding: 2px 6px;
+	border-radius: var(--radius-sm);
+	margin-left: auto;
+}
+
+/* API Key Actions */
+.api-key-actions {
+	display: flex;
+	gap: var(--spacing-sm);
+}
+
+.api-key-actions button {
+	flex: 1;
+}
+
+.secondary-button.danger {
+	color: var(--error-color);
+	border-color: var(--error-color);
+}
+
+.secondary-button.danger:hover {
+	background-color: var(--error-color);
+	color: white;
+}
+
+/* API Key Input State */
+#api-key-input-state label {
+	display: block;
+	margin-bottom: var(--spacing-sm);
+	color: var(--text-secondary);
+	font-size: 13px;
+	font-weight: var(--font-weight-medium);
+}
+
+#api-key-input {
 	font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
 	letter-spacing: 0.5px;
 	transition: all 0.3s ease;
-	padding-left: 35px;
+	padding-right: 45px;
+	/* Make room for toggle button */
 }
 
-#api-key::placeholder {
+#api-key-input::placeholder {
 	font-family: var(--font-family);
 	letter-spacing: normal;
 	font-style: italic;
 }
 
+/* Input toggle button for password visibility */
+.input-toggle-btn {
+	position: absolute;
+	right: var(--spacing-sm);
+	top: 50%;
+	transform: translateY(-50%);
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--text-muted);
+	padding: var(--spacing-xs);
+	border-radius: var(--radius-sm);
+	transition: all 0.2s ease;
+	z-index: 2;
+}
+
+.input-toggle-btn:hover {
+	color: var(--text-primary);
+	background-color: var(--bg-secondary);
+}
+
+.input-toggle-btn i {
+	font-size: 16px;
+}
+
+/* API Key Input Actions */
+.api-key-input-actions {
+	display: flex;
+	gap: var(--spacing-sm);
+	margin-top: var(--spacing-md);
+}
+
+.api-key-input-actions button {
+	flex: 1;
+}
+
+/* API Key Validation */
+.api-key-validation {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-xs);
+	margin-top: var(--spacing-sm);
+	padding: var(--spacing-sm);
+	background-color: rgba(239, 68, 68, 0.1);
+	border: 1px solid var(--error-color);
+	border-radius: var(--radius-md);
+	color: var(--error-color);
+	font-size: 12px;
+}
+
+.api-key-validation.hidden {
+	display: none;
+}
+
+.api-key-validation i {
+	font-size: 14px;
+	flex-shrink: 0;
+}
+
 /* Success state for valid API key format */
-#api-key.valid {
+#api-key-input.valid {
 	border-color: var(--success-color);
 }
 
-#api-key.valid:focus {
+#api-key-input.valid:focus {
 	box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 /* Warning state for partial entry */
-#api-key.partial {
+#api-key-input.partial {
 	border-color: var(--warning-color);
 }
 
-#api-key.partial:focus {
+#api-key-input.partial:focus {
 	box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+/* Error state for invalid API key */
+#api-key-input.invalid {
+	border-color: var(--error-color);
+}
+
+#api-key-input.invalid:focus {
+	box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
 /* Toggle Switch */
