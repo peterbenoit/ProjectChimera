@@ -299,24 +299,27 @@ async function handleSummarizeClick() {
 
 		saveFormatAndLengthPreferences(format, length);
 
-		// Use the already-fetched history to check for duplicates before saving (normalized URL)
-		const isDuplicate = history.some(item =>
-			(new URL(item.metadata.url).origin + new URL(item.metadata.url).pathname) === normalizedUrl &&
-			item.content === summary &&
-			Math.abs(new Date(item.timestamp) - new Date()) < 60000
+		// Remove any existing summary for this page (normalized URL) before saving the new one
+		const updatedHistory = await getSummaryHistory();
+		const existingIndex = updatedHistory.findIndex(item =>
+			(new URL(item.metadata.url).origin + new URL(item.metadata.url).pathname) === normalizedUrl
 		);
 
-		if (!isDuplicate) {
-			await saveSummaryToHistory({
-				content: summary,
-				metadata: pageData.metadata,
-				options: {
-					format,
-					length
-				},
-				timestamp: new Date().toISOString()
-			});
+		if (existingIndex !== -1) {
+			// Remove the existing summary for this page
+			await deleteSummaryFromHistory(existingIndex);
 		}
+
+		// Save the new summary
+		await saveSummaryToHistory({
+			content: summary,
+			metadata: pageData.metadata,
+			options: {
+				format,
+				length
+			},
+			timestamp: new Date().toISOString()
+		});
 
 	} catch (error) {
 		console.error('Error summarizing page:', error);
