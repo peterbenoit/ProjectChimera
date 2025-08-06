@@ -2425,3 +2425,43 @@ input:checked+.toggle-slider:before {
 .danger {
 	color: var(--error-color) !important;
 }
+
+/* Save Settings Button - Make it prominent and sticky */
+#save-settings {
+	position: sticky;
+	bottom: 0;
+	width: 100%;
+	margin: var(--spacing-xl) 0 0 0;
+	padding: var(--spacing-lg) var(--spacing-xl);
+	background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+	color: white;
+	border: none;
+	border-radius: var(--radius-md);
+	font-weight: var(--font-weight-semibold);
+	font-size: 15px;
+	box-shadow: var(--shadow-lg);
+	transition: all 0.3s ease;
+	z-index: 10;
+}
+
+#save-settings:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+	background: linear-gradient(135deg, var(--accent-hover), var(--accent-color));
+}
+
+#save-settings:active {
+	transform: translateY(0);
+}
+
+#save-settings:focus {
+	outline: none;
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3), var(--shadow-lg);
+}
+
+/* Settings tab container to support sticky button */
+#settings-tab {
+	position: relative;
+	padding-bottom: 80px;
+	/* Make room for sticky button */
+}
