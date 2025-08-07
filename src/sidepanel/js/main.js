@@ -608,16 +608,102 @@ function checkForPendingMessages() {
 		// console.log('SidePanel received message:', message);
 
 		if (message.action === 'summarizeSelection' && message.text) {
-			showLoading(true);
-
-			setTimeout(() => {
-				const selectedTextSummary = `Selected Text Summary:\n\n${message.text}`;
-				displaySummary(selectedTextSummary);
-			}, 1000);
+			handleSummarizeSelection(message.text);
 		}
 
 		return true;
 	});
+}
+
+/**
+ * Handle summarizing selected text from context menu
+ * @param {string} selectedText - The text selected by the user
+ */
+async function handleSummarizeSelection(selectedText) {
+	try {
+		// Switch to summary tab when summarization starts
+		switchToTab('summary');
+
+		hideError();
+
+		const format = formatSelect.value;
+		const length = lengthSelect.value;
+
+		const settings = await getSettings();
+		if (!settings.apiKey) {
+			throw new Error('API key is required. Please add your OpenAI API key in the Settings tab.');
+		}
+
+		showLoading(true);
+
+		const feedbackSettings = {
+			enableToneBiasAnalysis: settings.enableToneBiasAnalysis || false,
+			enableHighlightVagueClaims: settings.enableHighlightVagueClaims || false,
+			enableCounterpoints: settings.enableCounterpoints || false,
+			enableSentimentDetection: settings.enableSentimentDetection || false,
+			enableIntentSummary: settings.enableIntentSummary || false,
+			enableFactContrast: settings.enableFactContrast || false
+		};
+
+		// Create timeout handler
+		const timeoutHandler = () => {
+			return new Promise((resolve) => {
+				showTimeoutDialog(
+					'The request is taking longer than 30 seconds. This might be due to network latency, high server load, or a complex page.',
+					() => resolve(true),  // Continue waiting
+					() => resolve(false)  // Cancel request
+				);
+			});
+		};
+
+		// Generate summary of the selected text
+		const summary = await generateSummary(
+			selectedText, {
+			format,
+			length,
+			feedback: feedbackSettings
+		},
+			settings.apiKey,
+			timeoutHandler
+		);
+
+		displaySummary(summary);
+
+		// Get current page metadata for context
+		try {
+			const pageData = await requestPageContent();
+			lastSummaryMetadata = {
+				...pageData.metadata,
+				title: `Selected Text from: ${pageData.metadata.title}`,
+				isSelection: true
+			};
+		} catch (error) {
+			// If we can't get page data, create basic metadata
+			lastSummaryMetadata = {
+				title: 'Selected Text Summary',
+				url: window.location.href || 'Unknown',
+				timestamp: new Date().toISOString(),
+				isSelection: true
+			};
+		}
+
+		saveFormatAndLengthPreferences(format, length);
+
+		// Save the selection summary to history
+		await saveSummaryToHistory({
+			content: summary,
+			metadata: lastSummaryMetadata,
+			options: {
+				format,
+				length
+			},
+			timestamp: new Date().toISOString()
+		});
+
+	} catch (error) {
+		console.error('Error summarizing selection:', error);
+		showError(error.message || 'An error occurred while generating the summary.');
+	}
 }
 
 /**
