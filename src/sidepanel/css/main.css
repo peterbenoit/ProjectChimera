@@ -693,7 +693,6 @@ button.blue:hover {
 	background-color: var(--bg-tertiary);
 	padding: 2px 6px;
 	border-radius: var(--radius-sm);
-	/* margin-left: auto; */
 }
 
 /* API Key Actions */
@@ -2422,7 +2421,7 @@ input:checked+.toggle-slider:before {
 	}
 }
 
-.danger {
+.history-delete-btn.danger {
 	color: var(--error-color) !important;
 }
 
@@ -2442,6 +2441,15 @@ input:checked+.toggle-slider:before {
 	box-shadow: var(--shadow-lg);
 	transition: all 0.3s ease;
 	z-index: 10;
+
+	width: auto;
+	position: fixed;
+	border-radius: 9999px;
+
+	bottom: 45px;
+	right: 50px;
+	font-size: 20px;
+	padding: 10px;
 }
 
 #save-settings:hover {
