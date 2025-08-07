@@ -2432,7 +2432,7 @@ input:checked+.toggle-slider:before {
 	width: 100%;
 	margin: var(--spacing-xl) 0 0 0;
 	padding: var(--spacing-lg) var(--spacing-xl);
-	background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+	background: linear-gradient(135deg, #22c55e, #16a34a);
 	color: white;
 	border: none;
 	border-radius: var(--radius-md);
@@ -2454,8 +2454,8 @@ input:checked+.toggle-slider:before {
 
 #save-settings:hover {
 	transform: translateY(-2px);
-	box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
-	background: linear-gradient(135deg, var(--accent-hover), var(--accent-color));
+	box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
+	background: linear-gradient(135deg, #16a34a, #15803d);
 }
 
 #save-settings:active {
@@ -2464,7 +2464,7 @@ input:checked+.toggle-slider:before {
 
 #save-settings:focus {
 	outline: none;
-	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3), var(--shadow-lg);
+	box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3), var(--shadow-lg);
 }
 
 /* Settings tab container to support sticky button */
